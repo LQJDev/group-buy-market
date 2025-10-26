@@ -26,4 +26,13 @@ public class GroupBuyActivityDaoTest {
         log.info("测试结果:{}", JSON.toJSONString(groupBuyActivities));
     }
 
+    @Test
+    public void test_queryValidGroupBuyActivity() {
+        GroupBuyActivity groupBuyActivity = new GroupBuyActivity();
+        groupBuyActivity.setSource("s01");
+        groupBuyActivity.setChannel("c01");
+        GroupBuyActivity groupBuyActivityRes = groupBuyActivityDao.queryValidGroupBuyActivity(groupBuyActivity);
+        log.info("测试结果:{}", JSON.toJSONString(groupBuyActivityRes));
+    }
+
 }
