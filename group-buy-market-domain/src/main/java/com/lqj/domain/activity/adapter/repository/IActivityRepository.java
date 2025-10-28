@@ -1,6 +1,7 @@
 package com.lqj.domain.activity.adapter.repository;
 
 import com.lqj.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
+import com.lqj.domain.activity.model.valobj.SCSkuActivityVO;
 import com.lqj.domain.activity.model.valobj.SkuVO;
 import org.springframework.stereotype.Repository;
 
@@ -11,8 +12,11 @@ import org.springframework.stereotype.Repository;
  */
 public interface IActivityRepository {
 
-    GroupBuyActivityDiscountVO queryGroupBuyActivityDiscountVO(String source, String channel);
+    GroupBuyActivityDiscountVO queryGroupBuyActivityDiscountVO(Long activityId);
 
     SkuVO querySkuByGoodsId(String goodsId);
+
+    SCSkuActivityVO querySCSkuActivityVOBySCGoodsId(String source, String channel, String goodsId);
+
 
 }

@@ -31,7 +31,7 @@ public class IIndexGroupBuyMarketServiceTest {
         marketProductEntity.setUserId("xiaofuge");
         marketProductEntity.setSource("s01");
         marketProductEntity.setChannel("c01");
-        marketProductEntity.setGoodsId("9890001");
+        marketProductEntity.setGoodsId("9890002");
         TrialBalanceEntity trialBalanceEntity = iIndexGroupBuyMarketService.indexMarketTrial(marketProductEntity);
         log.info("trialBalanceEntity: {}", JSON.toJSONString(marketProductEntity));
         log.info("trialBalanceEntity: {}", JSON.toJSONString(trialBalanceEntity));

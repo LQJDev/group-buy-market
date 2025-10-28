@@ -3,12 +3,15 @@ package com.lqj.infrastructure.adapter.repository;
 import com.lqj.domain.activity.adapter.repository.IActivityRepository;
 import com.lqj.domain.activity.model.valobj.DiscountTypeEnum;
 import com.lqj.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
+import com.lqj.domain.activity.model.valobj.SCSkuActivityVO;
 import com.lqj.domain.activity.model.valobj.SkuVO;
 import com.lqj.infrastructure.dao.IGroupBuyActivityDao;
 import com.lqj.infrastructure.dao.IGroupBuyDiscountDao;
+import com.lqj.infrastructure.dao.ISCSkuActivityDao;
 import com.lqj.infrastructure.dao.ISkuDao;
 import com.lqj.infrastructure.dao.po.GroupBuyActivity;
 import com.lqj.infrastructure.dao.po.GroupBuyDiscount;
+import com.lqj.infrastructure.dao.po.SCSkuActivity;
 import com.lqj.infrastructure.dao.po.Sku;
 import org.springframework.stereotype.Repository;
 
@@ -31,15 +34,38 @@ public class ActivityRepository implements IActivityRepository {
     @Resource
     private ISkuDao skuDao;
 
+    @Resource
+    private ISCSkuActivityDao scSkuActivityDao;
+
+
+    public SCSkuActivityVO querySCSkuActivityVOBySCGoodsId(String source, String channel, String goodsId) {
+        SCSkuActivity scSkuActivityReq = new SCSkuActivity();
+        scSkuActivityReq.setSource(source);
+        scSkuActivityReq.setChannel(channel);
+        scSkuActivityReq.setGoodsId(goodsId);
+        SCSkuActivity scSkuActivityRsp = scSkuActivityDao.querySCSkuActivityBySCGoodsId(scSkuActivityReq);
+        if (null == scSkuActivityRsp) {
+            return null;
+        }
+        return SCSkuActivityVO.builder()
+                .source(scSkuActivityRsp.getSource())
+                .channel(scSkuActivityRsp.getChannel())
+                .activityId(scSkuActivityRsp.getActivityId())
+                .goodsId(scSkuActivityRsp.getGoodsId())
+                .build();
+    }
 
     @Override
-    public GroupBuyActivityDiscountVO queryGroupBuyActivityDiscountVO(String source, String channel) {
-        GroupBuyActivity groupBuyActivity = new GroupBuyActivity();
-        groupBuyActivity.setSource(source);
-        groupBuyActivity.setChannel(channel);
-        GroupBuyActivity groupBuyActivityRes = groupBuyActivityDao.queryValidGroupBuyActivity(groupBuyActivity);
+    public GroupBuyActivityDiscountVO queryGroupBuyActivityDiscountVO(Long activityId) {
+        GroupBuyActivity groupBuyActivityRes = groupBuyActivityDao.queryGroupBuyActivityById(activityId);
+        if (null == groupBuyActivityRes) {
+            return null;
+        }
         String discountId = groupBuyActivityRes.getDiscountId();
         GroupBuyDiscount groupBuyDiscountRes = groupBuyDiscountDao.queryGroupBuyActivityDiscountByDiscountId(discountId);
+        if (null == groupBuyDiscountRes) {
+            return null;
+        }
         GroupBuyActivityDiscountVO.GroupBuyDiscount groupBuyDiscount = GroupBuyActivityDiscountVO.GroupBuyDiscount.builder()
                 .discountName(groupBuyDiscountRes.getDiscountName())
                 .discountDesc(groupBuyDiscountRes.getDiscountDesc())
@@ -52,9 +78,6 @@ public class ActivityRepository implements IActivityRepository {
         return GroupBuyActivityDiscountVO.builder()
                 .activityId(groupBuyActivityRes.getActivityId())
                 .activityName(groupBuyActivityRes.getActivityName())
-                .source(groupBuyActivityRes.getSource())
-                .channel(groupBuyActivityRes.getChannel())
-                .goodsId(groupBuyActivityRes.getGoodsId())
                 .groupBuyDiscount(groupBuyDiscount)
                 .groupType(groupBuyActivityRes.getGroupType())
                 .takeLimitCount(groupBuyActivityRes.getTakeLimitCount())
@@ -71,6 +94,9 @@ public class ActivityRepository implements IActivityRepository {
     @Override
     public SkuVO querySkuByGoodsId(String goodsId) {
         Sku sku = skuDao.querySkuByGoodsId(goodsId);
+        if (null == sku) {
+            return null;
+        }
         return SkuVO.builder()
                 .goodsId(sku.getGoodsId())
                 .goodsName(sku.getGoodsName())
