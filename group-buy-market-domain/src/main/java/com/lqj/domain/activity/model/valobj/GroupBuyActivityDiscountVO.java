@@ -1,6 +1,8 @@
 package com.lqj.domain.activity.model.valobj;
 
+import com.lqj.types.common.Constants;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 
@@ -63,6 +65,24 @@ public class GroupBuyActivityDiscountVO {
      * 人群标签规则范围
      */
     private String tagScope;
+
+    public boolean isVisible() {
+        if (StringUtils.isBlank(this.tagScope)) return TagScopeEnumVO.VISIBLE.getAllow();
+        String[] split = this.tagScope.split(Constants.SPLIT);
+        if (split.length > 0 && "1".equals(split[0])) {
+            return TagScopeEnumVO.VISIBLE.getRefuse();
+        }
+        return TagScopeEnumVO.VISIBLE.getAllow();
+    }
+
+    public boolean isEnable() {
+        if (StringUtils.isBlank(this.tagScope)) return TagScopeEnumVO.ENABLE.getAllow();
+        String[] split = this.tagScope.split(Constants.SPLIT);
+        if (split.length == 2 && "2".equals(split[1])) {
+            return TagScopeEnumVO.ENABLE.getRefuse();
+        }
+        return TagScopeEnumVO.ENABLE.getAllow();
+    }
 
     @Getter
     @Builder

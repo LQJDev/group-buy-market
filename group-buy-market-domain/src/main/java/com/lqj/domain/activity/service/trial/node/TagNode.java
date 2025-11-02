@@ -1,9 +1,9 @@
 package com.lqj.domain.activity.service.trial.node;
 
+import com.lqj.domain.activity.adapter.repository.IActivityRepository;
 import com.lqj.domain.activity.model.entity.MarketProductEntity;
 import com.lqj.domain.activity.model.entity.TrialBalanceEntity;
 import com.lqj.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
-import com.lqj.domain.activity.model.valobj.SkuVO;
 import com.lqj.domain.activity.service.trial.AbstractGroupBuyMarketSupport;
 import com.lqj.domain.activity.service.trial.factory.DefaultActivityStrategyFactory;
 import com.lqj.types.design.framework.tree.StrategyHandler;
@@ -12,39 +12,45 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 
 /**
  * @Author 李岐鉴
- * @Date 2025/10/26
- * @Description EndNode 类
+ * @Date 2025/11/2
+ * @Description TagNode 类
  */
-@Service
 @Slf4j
-public class EndNode extends AbstractGroupBuyMarketSupport<MarketProductEntity, DefaultActivityStrategyFactory.DynamicContext, TrialBalanceEntity> {
+@Service
+public class TagNode extends AbstractGroupBuyMarketSupport<MarketProductEntity, DefaultActivityStrategyFactory.DynamicContext, TrialBalanceEntity> {
+
+    @Resource
+    private EndNode endNode;
+
+    @Resource
+    private IActivityRepository repository;
+
 
 
     @Override
     protected TrialBalanceEntity doApply(MarketProductEntity requestParameter, DefaultActivityStrategyFactory.DynamicContext dynamicContext) throws Exception {
         GroupBuyActivityDiscountVO groupBuyActivityDiscountVO = dynamicContext.getGroupBuyActivityDiscountVO();
-        SkuVO skuVO = dynamicContext.getSkuVO();
-        BigDecimal deductionPrice = dynamicContext.getDeductionPrice();
-        return TrialBalanceEntity.builder()
-                .goodsId(skuVO.getGoodsId())
-                .goodsName(skuVO.getGoodsName())
-                .originalPrice(skuVO.getOriginalPrice())
-                .deductionPrice(deductionPrice)
-                .targetCount(groupBuyActivityDiscountVO.getTakeLimitCount())
-                .startTime(groupBuyActivityDiscountVO.getStartTime())
-                .endTime(groupBuyActivityDiscountVO.getEndTime())
-                .isVisible(dynamicContext.isVisible())
-                .isEnable(dynamicContext.isEnable())
-                .build();
-    }
+        String tagId = groupBuyActivityDiscountVO.getTagId();
+        boolean visible = groupBuyActivityDiscountVO.isVisible();
+        boolean enable = groupBuyActivityDiscountVO.isEnable();
 
+        // 人群标签为空，则走默认值
+        if (StringUtils.isBlank(tagId)) {
+            dynamicContext.setVisible(true);
+            dynamicContext.setEnable(true);
+            return router(requestParameter, dynamicContext);
+        }
+        boolean isWithin = repository.isTagCrowRange(tagId, requestParameter.getUserId());
+        dynamicContext.setVisible(visible || isWithin);
+        dynamicContext.setEnable(enable || isWithin);
+        return router(requestParameter, dynamicContext);
+    }
 
     @Override
     public StrategyHandler<MarketProductEntity, DefaultActivityStrategyFactory.DynamicContext, TrialBalanceEntity> get(MarketProductEntity requestParameter, DefaultActivityStrategyFactory.DynamicContext dynamicContext) throws Exception {
-        return defaultStrategyHandler;
+        return endNode;
     }
 }

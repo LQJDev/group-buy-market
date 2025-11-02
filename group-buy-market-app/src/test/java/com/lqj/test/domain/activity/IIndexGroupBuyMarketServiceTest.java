@@ -28,10 +28,10 @@ public class IIndexGroupBuyMarketServiceTest {
     @Test
     public void test() throws Exception {
         MarketProductEntity marketProductEntity = new MarketProductEntity();
-        marketProductEntity.setUserId("xiaofuge");
+        marketProductEntity.setUserId("lqj");
         marketProductEntity.setSource("s01");
         marketProductEntity.setChannel("c01");
-        marketProductEntity.setGoodsId("9890002");
+        marketProductEntity.setGoodsId("9890001");
         TrialBalanceEntity trialBalanceEntity = iIndexGroupBuyMarketService.indexMarketTrial(marketProductEntity);
         log.info("trialBalanceEntity: {}", JSON.toJSONString(marketProductEntity));
         log.info("trialBalanceEntity: {}", JSON.toJSONString(trialBalanceEntity));
