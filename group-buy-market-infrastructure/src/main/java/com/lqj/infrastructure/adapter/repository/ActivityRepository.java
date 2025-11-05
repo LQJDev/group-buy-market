@@ -13,6 +13,7 @@ import com.lqj.infrastructure.dao.po.GroupBuyActivity;
 import com.lqj.infrastructure.dao.po.GroupBuyDiscount;
 import com.lqj.infrastructure.dao.po.SCSkuActivity;
 import com.lqj.infrastructure.dao.po.Sku;
+import com.lqj.infrastructure.dcc.DCCService;
 import com.lqj.infrastructure.redis.IRedisService;
 import org.redisson.api.RBitSet;
 import org.springframework.stereotype.Repository;
@@ -42,7 +43,8 @@ public class ActivityRepository implements IActivityRepository {
     @Resource
     private IRedisService redisService;
 
-
+    @Resource
+    private DCCService dccService;
 
     public SCSkuActivityVO querySCSkuActivityVOBySCGoodsId(String source, String channel, String goodsId) {
         SCSkuActivity scSkuActivityReq = new SCSkuActivity();
@@ -66,6 +68,16 @@ public class ActivityRepository implements IActivityRepository {
         RBitSet bitSet = redisService.getBitSet(tagId);
         if (!bitSet.isExists()) return true;
         return bitSet.get(redisService.getIndexFromUserId(userId));
+    }
+
+    @Override
+    public boolean downgradeSwitch() {
+        return dccService.isDowngradeSwitch();
+    }
+
+    @Override
+    public boolean cutRange(String userId) {
+        return dccService.isCutRange(userId);
     }
 
     @Override
