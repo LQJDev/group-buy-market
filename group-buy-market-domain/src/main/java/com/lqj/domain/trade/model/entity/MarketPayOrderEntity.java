@@ -1,0 +1,30 @@
+package com.lqj.domain.trade.model.entity;
+
+import com.lqj.domain.trade.model.valobj.TradeOrderStatusEnumVO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+
+/**
+ * @Author 李岐鉴
+ * @Date 2025/11/10
+ * @Description MarketPayOrderEntity 类
+ */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class MarketPayOrderEntity {
+
+    /** 订单id */
+    private String orderId;
+
+    /** 折扣金额 */
+    private BigDecimal deductionPrice;
+
+    /** 订单状态 */
+    private TradeOrderStatusEnumVO tradeOrderStatusEnumVO;
+}

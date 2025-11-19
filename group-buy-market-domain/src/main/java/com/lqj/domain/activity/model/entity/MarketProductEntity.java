@@ -23,4 +23,6 @@ public class MarketProductEntity {
     private String source;
 
     private String channel;
+
+    private Long activityId;
 }

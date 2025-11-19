@@ -1,5 +1,6 @@
 package com.lqj.types.exception;
 
+import com.lqj.types.enums.ResponseCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,6 +15,11 @@ public class AppException extends RuntimeException {
 
     /** 异常信息 */
     private String info;
+
+    public AppException(ResponseCode responseCode) {
+        this.code = responseCode.getCode();
+        this.info = responseCode.getInfo();
+    }
 
     public AppException(String code) {
         this.code = code;

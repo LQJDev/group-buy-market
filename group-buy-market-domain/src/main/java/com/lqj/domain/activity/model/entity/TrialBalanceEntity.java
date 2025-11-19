@@ -1,5 +1,6 @@
 package com.lqj.domain.activity.model.entity;
 
+import com.lqj.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,4 +37,6 @@ public class TrialBalanceEntity {
     private Boolean isVisible;
 
     private Boolean isEnable;
+
+    private GroupBuyActivityDiscountVO groupBuyActivityDiscountVO;
 }
