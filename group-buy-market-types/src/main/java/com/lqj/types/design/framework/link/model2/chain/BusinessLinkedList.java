@@ -1,0 +1,29 @@
+package com.lqj.types.design.framework.link.model2.chain;
+
+import com.lqj.types.design.framework.link.model2.handler.ILogicHandler;
+
+/**
+ * @Author 李岐鉴
+ * @Date 2025/11/21
+ * @Description BusinessLinkedList 类
+ */
+public class BusinessLinkedList<T, D, R> extends LinkedList<ILogicHandler<T, D, R>> implements ILogicHandler<T, D, R>{
+
+
+    public BusinessLinkedList(String name) {
+        super(name);
+    }
+
+    @Override
+    public R apply(T requestParameter, D dynamicContext) throws Exception {
+        Node<ILogicHandler<T, D, R>> current = this.first;
+        do {
+            ILogicHandler<T, D, R> item = current.item;
+            R result = item.apply(requestParameter, dynamicContext);
+            if (null != result) return result;
+            current = current.next;
+        } while (current != null);
+
+        return null;
+    }
+}
