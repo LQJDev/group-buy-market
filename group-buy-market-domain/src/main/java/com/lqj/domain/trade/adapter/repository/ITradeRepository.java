@@ -1,6 +1,7 @@
 package com.lqj.domain.trade.adapter.repository;
 
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
+import com.lqj.domain.trade.model.entity.GroupBuyActivityEntity;
 import com.lqj.domain.trade.model.entity.MarketPayOrderEntity;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
 
@@ -11,9 +12,13 @@ import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
  */
 public interface ITradeRepository {
 
-    MarketPayOrderEntity queryNoPayMarketPayOrderByOutTradeNo(String userId, String outTradeNo);
+    MarketPayOrderEntity queryMarketPayOrderEntityByOutTradeNo(String userId, String outTradeNo);
 
     GroupBuyProgressVO queryGroupBuyProgress(String teamId);
 
     MarketPayOrderEntity lockMarketPayOrder(GroupBuyOrderAggregate groupBuyOrderAggregate);
+
+    GroupBuyActivityEntity queryGroupBuyActivityEntityByActivityId(Long activityId);
+
+    Integer queryOrderCountByActivityId(Long activityId, String userId);
 }

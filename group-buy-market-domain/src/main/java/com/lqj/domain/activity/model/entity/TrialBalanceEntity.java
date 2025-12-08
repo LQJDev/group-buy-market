@@ -12,7 +12,7 @@ import java.util.Date;
 /**
  * @Author 李岐鉴
  * @Date 2025/10/25
- * @Description TrialBalanceEntity 类
+ * @Description 试算结果实体对象（给用户展示拼团可获得的优惠信息）
  */
 @Data
 @NoArgsConstructor
@@ -27,6 +27,8 @@ public class TrialBalanceEntity {
     private BigDecimal originalPrice;
 
     private BigDecimal deductionPrice;
+
+    private BigDecimal payPrice;
 
     private Integer targetCount;
 

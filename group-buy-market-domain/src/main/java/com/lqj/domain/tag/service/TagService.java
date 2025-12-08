@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @Author 李岐鉴
  * @Date 2025/10/27
- * @Description TagService 类
+ * @Description 人群标签服务
  */
 @Slf4j
 @Service
@@ -23,11 +23,19 @@ public class TagService implements ITagService{
 
     @Override
     public void execTagBatchJob(String tagId, String batchId) {
+        log.info("人群标签批次任务 tagId:{} batchId:{}", tagId, batchId);
+
+        // 1、查询批次任务
         CrowdTagsJobEntity crowdTagsJobEntity = repository.queryCrowdTagsJobEntity(tagId, batchId);
 
+        // 2、采集用户数据 - 这部分需要采集用户的消费类数据，后续有用户发起拼团再处理
+
+        // 3、数据写入记录
         List<String> userIdList = new ArrayList<String>(){
             {
-                add("lqj");
+                add("xfg01");
+                add("xfg02");
+                add("xfg03");
             }
         };
         for (String userId : userIdList) {

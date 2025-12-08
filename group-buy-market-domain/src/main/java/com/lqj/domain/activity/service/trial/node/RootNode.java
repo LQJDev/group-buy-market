@@ -22,9 +22,9 @@ import javax.annotation.Resource;
 @Service
 @Slf4j
 public class RootNode extends AbstractGroupBuyMarketSupport<MarketProductEntity, DefaultActivityStrategyFactory.DynamicContext, TrialBalanceEntity>{
+
     @Resource
     private SwitchNode switchNode;
-
 
     @Override
     protected TrialBalanceEntity doApply(MarketProductEntity requestParameter, DefaultActivityStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -43,4 +43,5 @@ public class RootNode extends AbstractGroupBuyMarketSupport<MarketProductEntity,
     public StrategyHandler<MarketProductEntity, DefaultActivityStrategyFactory.DynamicContext, TrialBalanceEntity> get(MarketProductEntity requestParameter, DefaultActivityStrategyFactory.DynamicContext dynamicContext) throws Exception {
         return switchNode;
     }
+
 }

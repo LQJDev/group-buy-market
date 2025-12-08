@@ -10,7 +10,7 @@ import java.util.Date;
 /**
  * @Author 李岐鉴
  * @Date 2025/11/10
- * @Description PayActivityEntity 类
+ * @Description 拼团，支付活动实体对象
  */
 @Data
 @Builder

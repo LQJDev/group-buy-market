@@ -2,16 +2,17 @@ package com.lqj.infrastructure.adapter.repository;
 
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
-import com.lqj.domain.trade.model.entity.MarketPayOrderEntity;
-import com.lqj.domain.trade.model.entity.PayActivityEntity;
-import com.lqj.domain.trade.model.entity.PayDiscountEntity;
-import com.lqj.domain.trade.model.entity.UserEntity;
+import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
 import com.lqj.domain.trade.model.valobj.TradeOrderStatusEnumVO;
+import com.lqj.infrastructure.dao.IGroupBuyActivityDao;
 import com.lqj.infrastructure.dao.IGroupBuyOrderDao;
 import com.lqj.infrastructure.dao.IGroupBuyOrderListDao;
+import com.lqj.infrastructure.dao.po.GroupBuyActivity;
 import com.lqj.infrastructure.dao.po.GroupBuyOrder;
 import com.lqj.infrastructure.dao.po.GroupBuyOrderList;
+import com.lqj.types.common.Constants;
+import com.lqj.types.enums.ActivityStatusEnumVO;
 import com.lqj.types.enums.ResponseCode;
 import com.lqj.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -33,25 +34,28 @@ import javax.annotation.Resource;
 public class TradeRepository implements ITradeRepository {
 
     @Resource
+    private IGroupBuyActivityDao groupBuyActivityDao;
+
+    @Resource
     private IGroupBuyOrderListDao groupBuyOrderListDao;
 
     @Resource
     private IGroupBuyOrderDao groupBuyOrderDao;
 
     @Override
-    public MarketPayOrderEntity queryNoPayMarketPayOrderByOutTradeNo(String userId, String outTradeNo) {
+    public MarketPayOrderEntity queryMarketPayOrderEntityByOutTradeNo(String userId, String outTradeNo) {
 
         GroupBuyOrderList groupBuyOrderListReq = new GroupBuyOrderList();
         groupBuyOrderListReq.setUserId(userId);
         groupBuyOrderListReq.setOutTradeNo(outTradeNo);
-        GroupBuyOrderList groupBuyOrderList = groupBuyOrderListDao.queryGroupBuyOrderRecordByOutTradeNo(groupBuyOrderListReq);
-        if (groupBuyOrderList == null) {
+        GroupBuyOrderList groupBuyOrderListRes = groupBuyOrderListDao.queryGroupBuyOrderRecordByOutTradeNo(groupBuyOrderListReq);
+        if (groupBuyOrderListRes == null) {
             return null;
         }
         return MarketPayOrderEntity.builder()
-                .orderId(groupBuyOrderList.getOrderId())
-                .deductionPrice(groupBuyOrderList.getDeductionPrice())
-                .tradeOrderStatusEnumVO(TradeOrderStatusEnumVO.valueOf(groupBuyOrderList.getStatus()))
+                .orderId(groupBuyOrderListRes.getOrderId())
+                .deductionPrice(groupBuyOrderListRes.getDeductionPrice())
+                .tradeOrderStatusEnumVO(TradeOrderStatusEnumVO.valueOf(groupBuyOrderListRes.getStatus()))
                 .build();
     }
 
@@ -74,10 +78,14 @@ public class TradeRepository implements ITradeRepository {
         UserEntity userEntity = groupBuyOrderAggregate.getUserEntity();
         PayActivityEntity payActivityEntity = groupBuyOrderAggregate.getPayActivityEntity();
         PayDiscountEntity payDiscountEntity = groupBuyOrderAggregate.getPayDiscountEntity();
+        Integer userTakeOrderCount = groupBuyOrderAggregate.getUserTakeOrderCount();
 
+        // 判断是否有团 - teamId 为空 - 新团， 不空 - 老团
         String teamId = payActivityEntity.getTeamId();
         if (StringUtils.isBlank(teamId)) {
+            // 使用 RandomStringUtils.randomNumeric(8) 替代公司里面使用的雪花算法
             teamId = RandomStringUtils.randomNumeric(8);
+
             // 构建拼团订单
             GroupBuyOrder groupBuyOrder = GroupBuyOrder.builder()
                     .teamId(teamId)
@@ -86,13 +94,16 @@ public class TradeRepository implements ITradeRepository {
                     .channel(payDiscountEntity.getChannel())
                     .originalPrice(payDiscountEntity.getOriginalPrice())
                     .deductionPrice(payDiscountEntity.getDeductionPrice())
-                    .payPrice(payDiscountEntity.getOriginalPrice().subtract(payDiscountEntity.getDeductionPrice()))
+                    .payPrice(payDiscountEntity.getPayPrice())
                     .targetCount(payActivityEntity.getTargetCount())
                     .completeCount(0)
                     .lockCount(1)
                     .build();
+            // 写入记录
             groupBuyOrderDao.insert(groupBuyOrder);
+
         } else {
+            //
             int updateAddTargetCount = groupBuyOrderDao.updateAddLockCount(teamId);
             if (1 != updateAddTargetCount) {
                 throw new AppException(ResponseCode.E0005);
@@ -115,6 +126,8 @@ public class TradeRepository implements ITradeRepository {
                 .deductionPrice(payDiscountEntity.getDeductionPrice())
                 .status(TradeOrderStatusEnumVO.CREATE.getCode())
                 .outTradeNo(payDiscountEntity.getOutTradeNo())
+                // 构建 bizId 唯一值：活动id_用户id_参与次数累加
+                .bizId(payActivityEntity.getActivityId() + Constants.UNDERLINE + userEntity.getUserId() + Constants.UNDERLINE + (userTakeOrderCount + 1))
                 .build();
         try {
             groupBuyOrderListDao.insert(groupBuyOrderListReq);
@@ -127,5 +140,32 @@ public class TradeRepository implements ITradeRepository {
                 .deductionPrice(payDiscountEntity.getDeductionPrice())
                 .tradeOrderStatusEnumVO(TradeOrderStatusEnumVO.CREATE)
                 .build();
+    }
+
+    @Override
+    public GroupBuyActivityEntity queryGroupBuyActivityEntityByActivityId(Long activityId) {
+        GroupBuyActivity groupBuyActivity = groupBuyActivityDao.queryGroupBuyActivityById(activityId);
+        return GroupBuyActivityEntity.builder()
+                .activityId(groupBuyActivity.getActivityId())
+                .activityName(groupBuyActivity.getActivityName())
+                .discountId(groupBuyActivity.getDiscountId())
+                .groupType(groupBuyActivity.getGroupType())
+                .takeLimitCount(groupBuyActivity.getTakeLimitCount())
+                .target(groupBuyActivity.getTarget())
+                .validTime(groupBuyActivity.getValidTime())
+                .status(ActivityStatusEnumVO.valueOf(groupBuyActivity.getStatus()))
+                .startTime(groupBuyActivity.getStartTime())
+                .endTime(groupBuyActivity.getEndTime())
+                .tagId(groupBuyActivity.getTagId())
+                .tagScope(groupBuyActivity.getTagScope())
+                .build();
+    }
+
+    @Override
+    public Integer queryOrderCountByActivityId(Long activityId, String userId) {
+        GroupBuyOrderList groupBuyOrderListReq = new GroupBuyOrderList();
+        groupBuyOrderListReq.setActivityId(activityId);
+        groupBuyOrderListReq.setUserId(userId);
+        return groupBuyOrderListDao.queryOrderCountByActivityId(groupBuyOrderListReq);
     }
 }

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 /**
  * @Author 李岐鉴
  * @Date 2025/11/10
- * @Description MarketPayOrderEntity 类
+ * @Description 拼团，预购订单营销实体对象
  */
 @Data
 @Builder
