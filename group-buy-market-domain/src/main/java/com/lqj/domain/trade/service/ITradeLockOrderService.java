@@ -11,7 +11,7 @@ import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
  * @Date 2025/11/10
  * @Description 交易订单服务接口
  */
-public interface ITradeOrderService {
+public interface ITradeLockOrderService {
 
     /**
      * 查询未支付订单

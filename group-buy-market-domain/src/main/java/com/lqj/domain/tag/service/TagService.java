@@ -33,9 +33,12 @@ public class TagService implements ITagService{
         // 3、数据写入记录
         List<String> userIdList = new ArrayList<String>(){
             {
-                add("xfg01");
-                add("xfg02");
-                add("xfg03");
+                add("xfg04");
+                add("xfg05");
+                add("xfg06");
+                add("xfg07");
+                add("xfg08");
+                add("xfg09");
             }
         };
         for (String userId : userIdList) {
