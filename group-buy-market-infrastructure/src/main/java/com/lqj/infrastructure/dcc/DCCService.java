@@ -1,8 +1,12 @@
 package com.lqj.infrastructure.dcc;
 
 import com.lqj.types.annotations.DCCValue;
+import com.lqj.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @Author 李岐鉴
@@ -18,6 +22,9 @@ public class DCCService {
 
     @DCCValue("cutRange:100")
     private String cutRange;
+
+    @DCCValue("scBlacklist:s02c02")
+    private String scBlacklist;
 
     public boolean isDowngradeSwitch() {
         log.info("downgradeSwitch:{}", downgradeSwitch);
@@ -35,6 +42,19 @@ public class DCCService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 判断是否黑名单
+     *
+     * @param source
+     * @param channel
+     * @return
+     */
+
+    public boolean isSCBlackIntercept(String source, String channel) {
+        List<String> list = Arrays.asList(scBlacklist.split(Constants.SPLIT));
+        return list.contains(source + channel);
     }
 
 }

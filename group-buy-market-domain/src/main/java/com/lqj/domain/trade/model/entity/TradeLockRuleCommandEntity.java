@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TradeRuleCommandEntity {
+public class TradeLockRuleCommandEntity {
 
     private String userId;
 
