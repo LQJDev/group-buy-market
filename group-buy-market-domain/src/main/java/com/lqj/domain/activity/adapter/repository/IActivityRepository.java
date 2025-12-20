@@ -1,9 +1,13 @@
 package com.lqj.domain.activity.adapter.repository;
 
+import com.lqj.domain.activity.model.entity.UserGroupBuyOrderDetailEntity;
 import com.lqj.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
 import com.lqj.domain.activity.model.valobj.SCSkuActivityVO;
 import com.lqj.domain.activity.model.valobj.SkuVO;
+import com.lqj.domain.activity.model.valobj.TeamStatisticVO;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * @Author 李岐鉴
@@ -23,4 +27,10 @@ public interface IActivityRepository {
     boolean downgradeSwitch();
 
     boolean cutRange(String userId);
+
+    List<UserGroupBuyOrderDetailEntity> queryInProgressUserGroupBuyOrderDetailListByOwner(Long activityId, String userId, Integer ownerCount);
+
+    List<UserGroupBuyOrderDetailEntity> queryInProgressUserGroupBuyOrderDetailListByRandom(Long activityId, String userId, int randomCount);
+
+    TeamStatisticVO queryTeamStatisticByActivityId(Long activityId);
 }
