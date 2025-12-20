@@ -1,6 +1,9 @@
 package com.lqj.api.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Author 李岐鉴
@@ -8,6 +11,9 @@ import lombok.Data;
  * @Description SettlementMarketPayOrderResponseDTO 类
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SettlementMarketPayOrderResponseDTO {
 
     /** 用户ID */
