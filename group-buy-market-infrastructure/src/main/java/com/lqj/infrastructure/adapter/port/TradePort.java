@@ -2,6 +2,8 @@ package com.lqj.infrastructure.adapter.port;
 
 import com.lqj.domain.trade.adapter.port.ITradePort;
 import com.lqj.domain.trade.model.entity.NotifyTaskEntity;
+import com.lqj.domain.trade.model.valobj.NotifyTypeEnumVO;
+import com.lqj.infrastructure.event.EventPublisher;
 import com.lqj.infrastructure.gateway.GroupBuyNotifyService;
 import com.lqj.infrastructure.redis.IRedisService;
 import com.lqj.types.enums.NotifyTaskHTTPEnumVO;
@@ -24,6 +26,8 @@ public class TradePort implements ITradePort {
     private GroupBuyNotifyService groupBuyNotifyService;
     @Resource
     private IRedisService redisService;
+    @Resource
+    private EventPublisher publisher;
 
 
     @Override
@@ -33,12 +37,21 @@ public class TradePort implements ITradePort {
             //  group-buy-market 拼团服务端会被部署到多台应用服务器上，那么就会有很多任务一起执行。这个时候要进行抢占，避免被多次执行
             if (lock.tryLock(3, 0, TimeUnit.SECONDS)) {
                 try {
-                    // 校验notifyUrl: 无效则直接返回成功
-                    if (StringUtils.isBlank(notifyTask.getNotifyUrl()) || "暂无".equals(notifyTask.getNotifyUrl())) {
+                    // 回调方式 HTTP
+                    if (NotifyTypeEnumVO.HTTP.getCode().equals(notifyTask.getNotifyType())) {
+                        // 无效的 notifyUrl 则直接返回成功
+                        if (StringUtils.isBlank(notifyTask.getNotifyUrl()) || "暂无".equals(notifyTask.getNotifyUrl())) {
+                            return NotifyTaskHTTPEnumVO.SUCCESS.getCode();
+                        }
+                        return groupBuyNotifyService.groupBuyNotify(notifyTask.getNotifyUrl(), notifyTask.getParameterJson());
+                    }
+
+                    // 回调方式 MQ
+                    if (NotifyTypeEnumVO.MQ.getCode().equals(notifyTask.getNotifyType())) {
+                        publisher.publish(notifyTask.getNotifyMQ(), notifyTask.getParameterJson());
                         return NotifyTaskHTTPEnumVO.SUCCESS.getCode();
                     }
-                    // 执行具体的拼团通知逻辑
-                    return groupBuyNotifyService.groupBuyNotify(notifyTask.getNotifyUrl(), notifyTask.getParameterJson());
+
                 } finally {
                     // 释放锁: 确保当前线程持有锁的时候才释放
                     if (lock.isLocked() && lock.isHeldByCurrentThread()) {

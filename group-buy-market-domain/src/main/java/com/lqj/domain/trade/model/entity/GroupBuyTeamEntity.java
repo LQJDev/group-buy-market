@@ -1,6 +1,7 @@
 package com.lqj.domain.trade.model.entity;
 
 
+import com.lqj.domain.trade.model.valobj.NotifyConfigVO;
 import com.lqj.types.enums.GroupBuyOrderEnumVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,6 @@ public class GroupBuyTeamEntity {
     /** 拼团结束时间 - 拼团有效时长 */
     private Date validEndTime;
     /** 回调地址 */
-    private String notifyUrl;
+    private NotifyConfigVO notifyConfigVO;
 
 }

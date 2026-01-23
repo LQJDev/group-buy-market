@@ -13,6 +13,8 @@ import com.lqj.domain.activity.model.valobj.GroupBuyActivityDiscountVO;
 import com.lqj.domain.activity.service.IIndexGroupBuyMarketService;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
+import com.lqj.domain.trade.model.valobj.NotifyConfigVO;
+import com.lqj.domain.trade.model.valobj.NotifyTypeEnumVO;
 import com.lqj.domain.trade.service.ITradeLockOrderService;
 import com.lqj.domain.trade.service.ITradeSettlementOrderService;
 import com.lqj.types.enums.ResponseCode;
@@ -62,7 +64,7 @@ public class MarketTradeController implements IMarketTradeService {
             Long activityId = lockMarketPayOrderRequestDTO.getActivityId();
             String outTradeNo = lockMarketPayOrderRequestDTO.getOutTradeNo();
             String teamId = lockMarketPayOrderRequestDTO.getTeamId();
-            String notifyUrl = lockMarketPayOrderRequestDTO.getNotifyUrl();
+            LockMarketPayOrderRequestDTO.NotifyConfigVO notifyConfigVO = lockMarketPayOrderRequestDTO.getNotifyConfigVO();
 
             log.info("营销交易锁单:{} LockMarketPayOrderRequestDTO:{}", userId, JSON.toJSONString(lockMarketPayOrderRequestDTO));
 
@@ -111,6 +113,15 @@ public class MarketTradeController implements IMarketTradeService {
                     .activityId(activityId)
                     .build());
 
+            // 人群限定
+            if (!trialBalanceEntity.getIsVisible() || !trialBalanceEntity.getIsEnable()) {
+                return Response.<LockMarketPayOrderResponseDTO>builder()
+                        .code(ResponseCode.E0007.getCode())
+                        .info(ResponseCode.E0007.getInfo())
+                        .build();
+            }
+
+
             GroupBuyActivityDiscountVO groupBuyActivityDiscountVO = trialBalanceEntity.getGroupBuyActivityDiscountVO();
 
             // 营销优惠锁单
@@ -134,7 +145,13 @@ public class MarketTradeController implements IMarketTradeService {
                             .deductionPrice(trialBalanceEntity.getDeductionPrice())
                             .payPrice(trialBalanceEntity.getPayPrice())
                             .outTradeNo(outTradeNo)
-                            .notifyUrl(notifyUrl)
+                            .notifyConfigVO(
+                                    NotifyConfigVO.builder()
+                                            .notifyType(NotifyTypeEnumVO.valueOf(notifyConfigVO.getNotifyType()))
+                                            .notifyMQ(notifyConfigVO.getNotifyMQ())
+                                            .notifyUrl(notifyConfigVO.getNotifyUrl())
+                                            .build()
+                            )
                             .build()
             );
 
@@ -173,6 +190,7 @@ public class MarketTradeController implements IMarketTradeService {
     public Response<SettlementMarketPayOrderResponseDTO> settlementMarketPayOrder(@RequestBody SettlementMarketPayOrderRequestDTO requestDTO) {
         try {
             log.info("营销交易组队结算开始:{} outTradeNo:{}", requestDTO.getUserId(), requestDTO.getOutTradeNo());
+            log.info("requestDTO:{}", JSON.toJSONString(requestDTO));
 
             if (StringUtils.isBlank(requestDTO.getUserId()) || StringUtils.isBlank(requestDTO.getSource()) || StringUtils.isBlank(requestDTO.getChannel()) || StringUtils.isBlank(requestDTO.getOutTradeNo()) || null == requestDTO.getOutTradeTime()) {
                 return Response.<SettlementMarketPayOrderResponseDTO>builder()

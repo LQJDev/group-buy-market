@@ -1,5 +1,6 @@
 package com.lqj.domain.trade.model.entity;
 
+import com.lqj.domain.trade.model.valobj.NotifyConfigVO;
 import com.lqj.types.enums.GroupBuyOrderEnumVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,6 +60,8 @@ public class TradeSettlementRuleFilterBackEntity {
      */
     private Date validEndTime;
 
-    /** 回调地址 */
-    private String notifyUrl;
+    /**
+     * 回调配置
+     */
+    private NotifyConfigVO notifyConfigVO;
 }
