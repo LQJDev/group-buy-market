@@ -54,4 +54,6 @@ public class ActivityUsabilityRuleFilter implements ILogicHandler<TradeLockRuleC
         return next(requestParameter, dynamicContext);
 
     }
+
+
 }

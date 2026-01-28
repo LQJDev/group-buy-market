@@ -18,6 +18,7 @@ import com.lqj.infrastructure.dao.po.GroupBuyOrder;
 import com.lqj.infrastructure.dao.po.GroupBuyOrderList;
 import com.lqj.infrastructure.dao.po.NotifyTask;
 import com.lqj.infrastructure.dcc.DCCService;
+import com.lqj.infrastructure.redis.IRedisService;
 import com.lqj.types.common.Constants;
 import com.lqj.types.enums.ActivityStatusEnumVO;
 import com.lqj.types.enums.GroupBuyOrderEnumVO;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author 李岐鉴
@@ -60,6 +62,9 @@ public class TradeRepository implements ITradeRepository {
 
     @Value("${spring.rabbitmq.config.producer.topic_team_success.routing_key}")
     private String topic_team_success;
+
+    @Resource
+    private IRedisService redisService;
 
     @Override
     public MarketPayOrderEntity queryMarketPayOrderEntityByOutTradeNo(String userId, String outTradeNo) {
@@ -349,6 +354,33 @@ public class TradeRepository implements ITradeRepository {
     public int updateNotifyTaskStatusRetry(String teamId) {
         return notifyTaskDao.updateNotifyTaskStatusRetry(teamId);
     }
+
+    @Override
+    public boolean occupyTeamStock(String teamStockKey, String recoveryTeamStockKey, Integer target, Integer validTime) {
+        Long recoveryTeamStockCount = redisService.getAtomicLong(recoveryTeamStockKey);
+        recoveryTeamStockCount = recoveryTeamStockCount == null ? 0 : recoveryTeamStockCount;
+
+        long occupy = redisService.incr(teamStockKey) + 1;
+        if (occupy > recoveryTeamStockCount + target) {
+            redisService.setAtomicLong(teamStockKey, target);
+            return false;
+        }
+        String lockKey = teamStockKey + Constants.UNDERLINE + occupy;
+        Boolean lock = redisService.setNx(lockKey, validTime + 60, TimeUnit.MINUTES);
+        if (!lock) {
+            log.info("组队库存加锁失败 {}", lockKey);
+        }
+        return lock;
+    }
+
+    @Override
+    public void recoveryTeamStock(String recoveryTeamStockKey, Integer validTime) {
+        // 首次组队拼团，是没有 teamId 的，所以不需要这个做处理。
+        if (StringUtils.isBlank(recoveryTeamStockKey)) return;
+
+        redisService.incr(recoveryTeamStockKey);
+    }
+
 
 
 }

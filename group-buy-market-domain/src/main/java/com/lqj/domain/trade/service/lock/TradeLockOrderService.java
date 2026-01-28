@@ -47,6 +47,7 @@ public class TradeLockOrderService implements ITradeLockOrderService {
         TradeLockRuleFilterBackEntity tradeLockRuleFilterBackEntity = tradeRuleFilter.apply(TradeLockRuleCommandEntity.builder()
                         .activityId(payActivityEntity.getActivityId())
                         .userId(userEntity.getUserId())
+                        .teamId(payActivityEntity.getTeamId())
                         .build(),
                 new TradeRuleFilterFactory.DynamicContext());
 
