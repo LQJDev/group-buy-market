@@ -26,9 +26,21 @@ public class DCCService {
     @DCCValue("scBlacklist:s02c02")
     private String scBlacklist;
 
+    @DCCValue("cacheSwitch:0")
+    private String cacheOpenSwitch;
+
     public boolean isDowngradeSwitch() {
         log.info("downgradeSwitch:{}", downgradeSwitch);
         return "1".equals(downgradeSwitch);
+    }
+
+    /**
+     * 是否开启缓存(0开启，1关闭)
+     *
+     * @return
+     */
+    public boolean isCacheOpenSwitch() {
+        return "0".equals(cacheOpenSwitch);
     }
 
     public boolean isCutRange(String userId) {

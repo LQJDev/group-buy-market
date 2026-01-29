@@ -185,7 +185,7 @@ public class TradeRepository implements ITradeRepository {
 
     @Override
     public GroupBuyActivityEntity queryGroupBuyActivityEntityByActivityId(Long activityId) {
-        GroupBuyActivity groupBuyActivity = groupBuyActivityDao.queryGroupBuyActivityById(activityId);
+        GroupBuyActivity groupBuyActivity = groupBuyActivityDao.queryGroupBuyActivityByActivityId(activityId);
         return GroupBuyActivityEntity.builder()
                 .activityId(groupBuyActivity.getActivityId())
                 .activityName(groupBuyActivity.getActivityName())

@@ -38,6 +38,7 @@ public class IIndexGroupBuyMarketServiceImpl implements IIndexGroupBuyMarketServ
     @Override
     public List<UserGroupBuyOrderDetailEntity> queryInProgressUserGroupBuyOrderDetailList(Long activityId, String userId, Integer ownerCount, int randomCount) {
         List<UserGroupBuyOrderDetailEntity> unionAllList = new ArrayList<>();
+
         // 查询个人拼团数据
         if (0 != ownerCount) {
             List<UserGroupBuyOrderDetailEntity> ownerList = repository.queryInProgressUserGroupBuyOrderDetailListByOwner(activityId, userId, ownerCount);
