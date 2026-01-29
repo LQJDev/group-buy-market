@@ -1,11 +1,12 @@
 package com.lqj.domain.activity.service.trial.node;
 
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.alibaba.fastjson.JSON;
 import com.lqj.domain.activity.model.entity.MarketProductEntity;
 import com.lqj.domain.activity.model.entity.TrialBalanceEntity;
 import com.lqj.domain.activity.service.trial.AbstractGroupBuyMarketSupport;
 import com.lqj.domain.activity.service.trial.factory.DefaultActivityStrategyFactory;
-import com.lqj.types.design.framework.tree.StrategyHandler;
+
 import com.lqj.types.enums.ResponseCode;
 import com.lqj.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;

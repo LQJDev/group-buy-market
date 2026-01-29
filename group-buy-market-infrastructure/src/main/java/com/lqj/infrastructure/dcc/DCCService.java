@@ -1,6 +1,7 @@
 package com.lqj.infrastructure.dcc;
 
-import com.lqj.types.annotations.DCCValue;
+
+import cn.bugstack.wrench.dynamic.config.center.types.annotations.DCCValue;
 import com.lqj.types.common.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

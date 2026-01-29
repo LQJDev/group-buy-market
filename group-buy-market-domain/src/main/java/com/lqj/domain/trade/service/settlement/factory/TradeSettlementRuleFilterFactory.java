@@ -1,5 +1,7 @@
 package com.lqj.domain.trade.service.settlement.factory;
 
+import cn.bugstack.wrench.design.framework.link.model2.LinkArmory;
+import cn.bugstack.wrench.design.framework.link.model2.chain.BusinessLinkedList;
 import com.lqj.domain.trade.model.entity.GroupBuyTeamEntity;
 import com.lqj.domain.trade.model.entity.MarketPayOrderEntity;
 import com.lqj.domain.trade.model.entity.TradeSettlementRuleCommandEntity;
@@ -8,8 +10,7 @@ import com.lqj.domain.trade.service.settlement.filter.EndRuleFilter;
 import com.lqj.domain.trade.service.settlement.filter.OutTradeNoRuleFilter;
 import com.lqj.domain.trade.service.settlement.filter.SCRuleFilter;
 import com.lqj.domain.trade.service.settlement.filter.SettableRuleFilter;
-import com.lqj.types.design.framework.link.model2.LinkArmory;
-import com.lqj.types.design.framework.link.model2.chain.BusinessLinkedList;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class TradeSettlementRuleFilterFactory {
 
     @Bean("tradeSettlementRuleFilter")
     public BusinessLinkedList<TradeSettlementRuleCommandEntity,
-            TradeSettlementRuleFilterFactory.DynamicContext, TradeSettlementRuleFilterBackEntity> tradeSettlementRuleFilter(
+                DynamicContext, TradeSettlementRuleFilterBackEntity> tradeSettlementRuleFilter(
             SCRuleFilter scRuleFilter,
             OutTradeNoRuleFilter outTradeNoRuleFilter,
             SettableRuleFilter settableRuleFilter,

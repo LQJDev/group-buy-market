@@ -1,5 +1,6 @@
 package com.lqj.domain.activity.service.trial.node;
 
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.alibaba.fastjson.JSON;
 import com.lqj.domain.activity.model.entity.MarketProductEntity;
 import com.lqj.domain.activity.model.entity.TrialBalanceEntity;
@@ -10,7 +11,7 @@ import com.lqj.domain.activity.service.trial.AbstractGroupBuyMarketSupport;
 import com.lqj.domain.activity.service.trial.factory.DefaultActivityStrategyFactory;
 import com.lqj.domain.activity.service.trial.thread.QueryGroupBuyActivityDiscountVOThreadTask;
 import com.lqj.domain.activity.service.trial.thread.QuerySkuVOFromDBThreadTask;
-import com.lqj.types.design.framework.tree.StrategyHandler;
+
 import com.lqj.types.enums.ResponseCode;
 import com.lqj.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @Author 李岐鉴
@@ -49,7 +48,7 @@ public class MarketNode extends AbstractGroupBuyMarketSupport<MarketProductEntit
     private ErrorNode errorNode;
 
     @Override
-    protected void multiThread(MarketProductEntity requestParameter, DefaultActivityStrategyFactory.DynamicContext dynamicContext) throws Exception {
+    protected void multiThread(MarketProductEntity requestParameter, DefaultActivityStrategyFactory.DynamicContext dynamicContext) throws ExecutionException, InterruptedException, TimeoutException {
         // 异步查询活动配置
         QuerySkuVOFromDBThreadTask querySkuVOFromDBThreadTask = new
                 QuerySkuVOFromDBThreadTask(requestParameter.getGoodsId(), repository);

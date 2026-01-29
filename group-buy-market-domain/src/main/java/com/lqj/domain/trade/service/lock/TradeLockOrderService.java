@@ -1,12 +1,13 @@
 package com.lqj.domain.trade.service.lock;
 
+import cn.bugstack.wrench.design.framework.link.model2.chain.BusinessLinkedList;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
 import com.lqj.domain.trade.service.ITradeLockOrderService;
 import com.lqj.domain.trade.service.lock.factory.TradeRuleFilterFactory;
-import com.lqj.types.design.framework.link.model2.chain.BusinessLinkedList;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

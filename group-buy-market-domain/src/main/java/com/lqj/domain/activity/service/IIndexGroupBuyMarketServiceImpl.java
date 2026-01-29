@@ -1,12 +1,13 @@
 package com.lqj.domain.activity.service;
 
+
 import com.lqj.domain.activity.adapter.repository.IActivityRepository;
 import com.lqj.domain.activity.model.entity.MarketProductEntity;
 import com.lqj.domain.activity.model.entity.TrialBalanceEntity;
 import com.lqj.domain.activity.model.entity.UserGroupBuyOrderDetailEntity;
 import com.lqj.domain.activity.model.valobj.TeamStatisticVO;
 import com.lqj.domain.activity.service.trial.factory.DefaultActivityStrategyFactory;
-import com.lqj.types.design.framework.tree.StrategyHandler;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

@@ -33,6 +33,11 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
             <version>3.2.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>cn.bugstack.wrench</groupId>
+            <artifactId>xfg-wrench-starter-dynamic-config-center</artifactId>
+        </dependency>
         <!-- 系统模块 -->
         <dependency>
             <groupId>cn.bugstack</groupId>

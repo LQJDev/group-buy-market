@@ -1,11 +1,14 @@
 package com.lqj.domain.activity.service.trial;
 
+import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRouter;
 import com.lqj.domain.activity.adapter.repository.IActivityRepository;
 import com.lqj.domain.activity.model.entity.TrialBalanceEntity;
 import com.lqj.domain.activity.service.trial.factory.DefaultActivityStrategyFactory;
-import com.lqj.types.design.framework.tree.AbstractMultiThreadStrategyRouter;
+
 
 import javax.annotation.Resource;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -19,10 +22,10 @@ public abstract class AbstractGroupBuyMarketSupport<MarketProductEntity, Dynamic
     protected IActivityRepository repository;
 
 
-    protected long timeout = 500;
+    protected long timeout = 5000;
     
     @Override
-    protected void multiThread(MarketProductEntity requestParameter, DynamicContext dynamicContext) throws Exception {
+    protected void multiThread(MarketProductEntity requestParameter, DynamicContext dynamicContext) throws ExecutionException, InterruptedException, TimeoutException {
         // 多线程处理
     }
 }

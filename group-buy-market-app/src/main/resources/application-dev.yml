@@ -76,6 +76,14 @@ mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
   config-location:  classpath:/mybatis/config/mybatis-config.xml
 
+xfg:
+  wrench:
+    config:
+      system: group-buy-market
+      register:
+        host: 117.72.172.224
+        port: 16379
+
 # 日志
 logging:
   level:
