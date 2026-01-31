@@ -90,3 +90,6 @@ logging:
     root: info
   config: classpath:logback-spring.xml
 
+logstash:
+  host: 117.72.172.224
+
