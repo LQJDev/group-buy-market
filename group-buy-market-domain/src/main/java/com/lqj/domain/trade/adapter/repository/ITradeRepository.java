@@ -1,6 +1,7 @@
 package com.lqj.domain.trade.adapter.repository;
 
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
+import com.lqj.domain.trade.model.aggregate.GroupBuyRefundAggregate;
 import com.lqj.domain.trade.model.aggregate.GroupBuyTeamSettlementAggregate;
 import com.lqj.domain.trade.model.entity.GroupBuyActivityEntity;
 import com.lqj.domain.trade.model.entity.GroupBuyTeamEntity;
@@ -46,4 +47,6 @@ public interface ITradeRepository {
     boolean occupyTeamStock(String teamStockKey, String recoveryTeamStockKey, Integer target, Integer validTime);
 
     void recoveryTeamStock(String recoveryTeamStockKey, Integer validTime);
+
+    void unpaid2Refund(GroupBuyRefundAggregate groupBuyRefundAggregate);
 }

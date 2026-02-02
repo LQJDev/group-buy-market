@@ -3,6 +3,7 @@ package com.lqj.infrastructure.adapter.repository;
 import com.alibaba.fastjson.JSON;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
+import com.lqj.domain.trade.model.aggregate.GroupBuyRefundAggregate;
 import com.lqj.domain.trade.model.aggregate.GroupBuyTeamSettlementAggregate;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
@@ -381,6 +382,32 @@ public class TradeRepository implements ITradeRepository {
         redisService.incr(recoveryTeamStockKey);
     }
 
+
+    @Transactional(timeout = 5000)
+    @Override
+    public void unpaid2Refund(GroupBuyRefundAggregate groupBuyRefundAggregate) {
+        TradeRefundOrderEntity tradeRefundOrderEntity = groupBuyRefundAggregate.getTradeRefundOrderEntity();
+        GroupBuyProgressVO groupBuyProgress = groupBuyRefundAggregate.getGroupBuyProgress();
+        GroupBuyOrder groupBuyOrderReq = new GroupBuyOrder();
+        groupBuyOrderReq.setTeamId(tradeRefundOrderEntity.getTeamId());
+        groupBuyOrderReq.setLockCount(groupBuyProgress.getLockCount());
+        int updateTeamUnpaid2Refund = groupBuyOrderDao.unpaid2Refund(groupBuyOrderReq);
+        if (1 != updateTeamUnpaid2Refund) {
+            log.error("逆向流程，更新组队记录(退单)失败 {} {}", tradeRefundOrderEntity.getUserId(), tradeRefundOrderEntity.getOrderId());
+            throw new AppException(ResponseCode.UPDATE_ZERO);
+        }
+
+        GroupBuyOrderList groupBuyOrderListReq = new GroupBuyOrderList();
+        groupBuyOrderListReq.setUserId(tradeRefundOrderEntity.getUserId());
+        groupBuyOrderListReq.setOrderId(tradeRefundOrderEntity.getOrderId());
+        int updateUnpaid2RefundCount = groupBuyOrderListDao.unpaid2Refund(groupBuyOrderListReq);
+        if (1 != updateUnpaid2RefundCount) {
+            log.error("逆向流程，更新用户组队记录(退单)失败 {} {}", tradeRefundOrderEntity.getUserId(), tradeRefundOrderEntity.getOrderId());
+            throw new AppException(ResponseCode.UPDATE_ZERO);
+        }
+
+
+    }
 
 
 }

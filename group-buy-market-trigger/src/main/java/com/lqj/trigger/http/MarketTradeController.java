@@ -15,6 +15,7 @@ import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
 import com.lqj.domain.trade.model.valobj.NotifyConfigVO;
 import com.lqj.domain.trade.model.valobj.NotifyTypeEnumVO;
+import com.lqj.domain.trade.model.valobj.TradeOrderStatusEnumVO;
 import com.lqj.domain.trade.service.ITradeLockOrderService;
 import com.lqj.domain.trade.service.ITradeSettlementOrderService;
 import com.lqj.types.enums.ResponseCode;
@@ -76,7 +77,7 @@ public class MarketTradeController implements IMarketTradeService {
             }
             // 查询outTradeNo 是否已经存在交易记录
             MarketPayOrderEntity marketPayOrderEntity = tradeOrderService.queryNoPayMarketPayOrderByOutTradeNo(userId, outTradeNo);
-            if (null != marketPayOrderEntity) {
+            if (null != marketPayOrderEntity && TradeOrderStatusEnumVO.CREATE.equals(marketPayOrderEntity.getTradeOrderStatusEnumVO())) {
                 LockMarketPayOrderResponseDTO lockMarketPayOrderResponseDTO = LockMarketPayOrderResponseDTO.builder()
                         .orderId(marketPayOrderEntity.getOrderId())
                         .originalPrice(marketPayOrderEntity.getOriginalPrice())

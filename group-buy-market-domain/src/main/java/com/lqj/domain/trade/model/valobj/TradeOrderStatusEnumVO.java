@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public enum TradeOrderStatusEnumVO {
 
     CREATE(0, "创建"),
-    CPMPLETE(1, "消费完成"),
+    COMPLETE(1, "消费完成"),
     CLOSE(2, "超时关闭"),
     ;
 
@@ -26,7 +26,7 @@ public enum TradeOrderStatusEnumVO {
             case 0:
                 return CREATE;
             case 1:
-                return CPMPLETE;
+                return COMPLETE;
             case 2:
                 return CLOSE;
         }
