@@ -48,6 +48,7 @@ public class TradeRefundOrderService implements ITradeRefundOrderService {
         iRefundOrderStrategy.refundOrder(TradeRefundOrderEntity.builder()
                 .orderId(orderId)
                 .teamId(teamId)
+                .activityId(groupBuyTeamEntity.getActivityId())
                 .userId(tradeRefundCommandEntity.getUserId())
                 .build());
 

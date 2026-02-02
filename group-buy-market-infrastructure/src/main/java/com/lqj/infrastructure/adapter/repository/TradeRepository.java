@@ -6,10 +6,7 @@ import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
 import com.lqj.domain.trade.model.aggregate.GroupBuyRefundAggregate;
 import com.lqj.domain.trade.model.aggregate.GroupBuyTeamSettlementAggregate;
 import com.lqj.domain.trade.model.entity.*;
-import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
-import com.lqj.domain.trade.model.valobj.NotifyConfigVO;
-import com.lqj.domain.trade.model.valobj.NotifyTypeEnumVO;
-import com.lqj.domain.trade.model.valobj.TradeOrderStatusEnumVO;
+import com.lqj.domain.trade.model.valobj.*;
 import com.lqj.infrastructure.dao.IGroupBuyActivityDao;
 import com.lqj.infrastructure.dao.IGroupBuyOrderDao;
 import com.lqj.infrastructure.dao.IGroupBuyOrderListDao;
@@ -63,6 +60,10 @@ public class TradeRepository implements ITradeRepository {
 
     @Value("${spring.rabbitmq.config.producer.topic_team_success.routing_key}")
     private String topic_team_success;
+
+    @Value("${spring.rabbitmq.config.producer.topic_team_refund.routing_key}")
+    private String topic_team_refund;
+
 
     @Resource
     private IRedisService redisService;
@@ -407,6 +408,61 @@ public class TradeRepository implements ITradeRepository {
         }
 
 
+    }
+
+    @Override
+    @Transactional(timeout = 5000)
+    public NotifyTaskEntity paid2Refund(GroupBuyRefundAggregate groupBuyRefundAggregate) {
+        TradeRefundOrderEntity tradeRefundOrderEntity = groupBuyRefundAggregate.getTradeRefundOrderEntity();
+        GroupBuyProgressVO groupBuyProgress = groupBuyRefundAggregate.getGroupBuyProgress();
+        String orderId = tradeRefundOrderEntity.getOrderId();
+        String userId = tradeRefundOrderEntity.getUserId();
+        String teamId = tradeRefundOrderEntity.getTeamId();
+
+        GroupBuyOrderList groupBuyOrderListReq = new GroupBuyOrderList();
+        groupBuyOrderListReq.setUserId(userId);
+        groupBuyOrderListReq.setOrderId(orderId);
+        int updatePaid2RefundCount = groupBuyOrderListDao.paid2Refund(groupBuyOrderListReq);
+
+        if (1 != updatePaid2RefundCount) {
+            log.error("逆向流程-paid2Refund，更新订单状态(退单)失败 {} {}", tradeRefundOrderEntity.getUserId(), tradeRefundOrderEntity.getOrderId());
+            throw new AppException(ResponseCode.UPDATE_ZERO);
+        }
+
+        GroupBuyOrder groupBuyOrderReq = new GroupBuyOrder();
+        groupBuyOrderReq.setTeamId(teamId);
+        groupBuyOrderReq.setLockCount(groupBuyProgress.getLockCount());
+        groupBuyOrderReq.setCompleteCount(groupBuyProgress.getCompleteCount());
+
+        int updateTeamPaid2RefundCount = groupBuyOrderDao.paid2Refund(groupBuyOrderReq);
+        if (1 != updateTeamPaid2RefundCount) {
+            log.error("逆向流程-paid2Refund，更新组队记录(退单)失败 {} {}", tradeRefundOrderEntity.getUserId(), tradeRefundOrderEntity.getOrderId());
+            throw new AppException(ResponseCode.UPDATE_ZERO);
+        }
+
+        NotifyTask notifyTask = new NotifyTask();
+        notifyTask.setActivityId(tradeRefundOrderEntity.getActivityId());
+        notifyTask.setTeamId(tradeRefundOrderEntity.getTeamId());
+        notifyTask.setNotifyType(NotifyTypeEnumVO.MQ.getCode());
+        notifyTask.setNotifyMQ(topic_team_refund);
+        notifyTask.setNotifyCount(0);
+        notifyTask.setNotifyStatus(0);
+        notifyTask.setParameterJson(JSON.toJSONString(new HashMap<String, Object>() {{
+            put("type", RefundTypeEnumVO.PAID_UNFORMED.getCode());
+            put("userId", tradeRefundOrderEntity.getUserId());
+            put("teamId", tradeRefundOrderEntity.getTeamId());
+            put("orderId", tradeRefundOrderEntity.getOrderId());
+            put("activityId", tradeRefundOrderEntity.getActivityId());
+        }}));
+
+        notifyTaskDao.insert(notifyTask);
+        return NotifyTaskEntity.builder()
+                .teamId(notifyTask.getTeamId())
+                .notifyType(notifyTask.getNotifyType())
+                .notifyMQ(notifyTask.getNotifyMQ())
+                .notifyCount(notifyTask.getNotifyCount())
+                .parameterJson(notifyTask.getParameterJson())
+                .build();
     }
 
 

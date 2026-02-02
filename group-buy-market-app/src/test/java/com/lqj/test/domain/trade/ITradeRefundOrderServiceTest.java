@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @Author 李岐鉴
@@ -26,7 +27,7 @@ public class ITradeRefundOrderServiceTest {
     private ITradeRefundOrderService tradeRefundOrderService;
 
     @Test
-    public void test_refundOrder() {
+    public void test_refundOrder() throws InterruptedException {
         TradeRefundCommandEntity tradeRefundCommandEntity = TradeRefundCommandEntity.builder()
                 .userId("xfg03")
                 .outTradeNo("452830583333")
@@ -38,5 +39,6 @@ public class ITradeRefundOrderServiceTest {
 
         log.info("请求参数:{}", JSON.toJSONString(tradeRefundCommandEntity));
         log.info("测试结果:{}", JSON.toJSONString(tradeRefundBehaviorEntity));
+        new CountDownLatch(1).await();
     }
 }
