@@ -18,8 +18,9 @@
 
     <insert id="insert" parameterType="com.lqj.infrastructure.dao.po.NotifyTask">
         insert into notify_task(activity_id, team_id, notify_type, notify_url, notify_mq, notify_count, notify_status, parameter_json,
-                                create_time, update_time)
-        values(#{activityId}, #{teamId}, #{notifyType}, #{notifyUrl}, #{notifyMQ}, #{notifyCount}, #{notifyStatus}, #{parameterJson}, now(),now())
+                                create_time, update_time, uuid, notify_category)
+        values(#{activityId}, #{teamId}, #{notifyType}, #{notifyUrl}, #{notifyMQ}, #{notifyCount},
+               #{notifyStatus}, #{parameterJson}, now(),now(), #{uuid}, #{notifyCategory})
     </insert>
 
     <select id="queryUnExecutedNotifyTaskList" resultMap="dataMap">

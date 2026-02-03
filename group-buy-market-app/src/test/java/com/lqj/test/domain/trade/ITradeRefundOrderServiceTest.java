@@ -27,10 +27,10 @@ public class ITradeRefundOrderServiceTest {
     private ITradeRefundOrderService tradeRefundOrderService;
 
     @Test
-    public void test_refundOrder() throws InterruptedException {
+    public void test_refundOrder_01() throws Exception {
         TradeRefundCommandEntity tradeRefundCommandEntity = TradeRefundCommandEntity.builder()
-                .userId("xfg03")
-                .outTradeNo("452830583333")
+                .userId("xfg01")
+                .outTradeNo("591721617480")
                 .source("s01")
                 .channel("c01")
                 .build();
@@ -39,6 +39,30 @@ public class ITradeRefundOrderServiceTest {
 
         log.info("请求参数:{}", JSON.toJSONString(tradeRefundCommandEntity));
         log.info("测试结果:{}", JSON.toJSONString(tradeRefundBehaviorEntity));
+
+        // 暂停，等待MQ消息。处理完后，手动关闭程序
         new CountDownLatch(1).await();
     }
+
+
+    @Test
+    public void test_refundOrder_02() throws Exception {
+        TradeRefundCommandEntity tradeRefundCommandEntity = TradeRefundCommandEntity.builder()
+                .userId("xfg04")
+                .outTradeNo("727869517356")
+                .source("s01")
+                .channel("c01")
+                .build();
+
+        TradeRefundBehaviorEntity tradeRefundBehaviorEntity = tradeRefundOrderService.refundOrder(tradeRefundCommandEntity);
+
+        log.info("请求参数:{}", JSON.toJSONString(tradeRefundCommandEntity));
+        log.info("测试结果:{}", JSON.toJSONString(tradeRefundBehaviorEntity));
+
+        // 暂停，等待MQ消息。处理完后，手动关闭程序
+        new CountDownLatch(1).await();
+    }
+
+
+
 }
