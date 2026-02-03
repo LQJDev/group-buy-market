@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class TradeRuleFilterFactory {
+public class TradeLockRuleFilterFactory {
+
+    private static String teamStockKey = "group_buy_market_team_stock_key_";
 
     @Bean("tradeRuleFilter")
     public BusinessLinkedList<TradeLockRuleCommandEntity, DynamicContext, TradeLockRuleFilterBackEntity>
@@ -67,6 +69,13 @@ public class TradeRuleFilterFactory {
             return teamStockKey + groupBuyActivity.getActivityId() + "_" + teamId + "_recovery";
         }
 
+    }
 
+    public static String generateTeamStockKey(Long activityId, String teamId) {
+        return teamStockKey + activityId + "_" + teamId;
+    }
+
+    public static String generateRecoveryTeamStockKey(Long activityId, String teamId) {
+        return teamStockKey + activityId + "_" + teamId + "_recovery";
     }
 }

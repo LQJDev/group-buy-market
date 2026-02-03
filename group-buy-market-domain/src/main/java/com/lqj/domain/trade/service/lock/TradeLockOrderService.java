@@ -6,7 +6,7 @@ import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
 import com.lqj.domain.trade.service.ITradeLockOrderService;
-import com.lqj.domain.trade.service.lock.factory.TradeRuleFilterFactory;
+import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class TradeLockOrderService implements ITradeLockOrderService {
     private ITradeRepository tradeRepository;
 
     @Resource
-    private BusinessLinkedList<TradeLockRuleCommandEntity, TradeRuleFilterFactory.DynamicContext, TradeLockRuleFilterBackEntity> tradeRuleFilter;
+    private BusinessLinkedList<TradeLockRuleCommandEntity, TradeLockRuleFilterFactory.DynamicContext, TradeLockRuleFilterBackEntity> tradeRuleFilter;
 
     @Override
     public MarketPayOrderEntity queryNoPayMarketPayOrderByOutTradeNo(String userId, String outTradeNo) {
@@ -50,7 +50,7 @@ public class TradeLockOrderService implements ITradeLockOrderService {
                         .userId(userEntity.getUserId())
                         .teamId(payActivityEntity.getTeamId())
                         .build(),
-                new TradeRuleFilterFactory.DynamicContext());
+                new TradeLockRuleFilterFactory.DynamicContext());
 
         //
         Integer userTakeOrderCount = tradeLockRuleFilterBackEntity.getUserTakeOrderCount();

@@ -6,7 +6,9 @@ import com.lqj.domain.trade.model.aggregate.GroupBuyRefundAggregate;
 import com.lqj.domain.trade.model.entity.GroupBuyTeamEntity;
 import com.lqj.domain.trade.model.entity.NotifyTaskEntity;
 import com.lqj.domain.trade.model.entity.TradeRefundOrderEntity;
+import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 import com.lqj.domain.trade.service.ITradeTaskService;
+import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
 import com.lqj.domain.trade.service.refund.business.IRefundOrderStrategy;
 import com.lqj.types.enums.GroupBuyOrderEnumVO;
 import com.lqj.types.exception.AppException;
@@ -47,7 +49,7 @@ public class PaidTeam2RefundStrategy implements IRefundOrderStrategy {
             threadPoolExecutor.execute(() -> {
                 Map<String, Integer> notifyResultMap = null;
                 try {
-                    tradeTaskService.execNotifyJob(notifyTaskEntity);
+                    notifyResultMap = tradeTaskService.execNotifyJob(notifyTaskEntity);
                     log.info("回调通知交易退单(已支付，已成团) result:{}", JSON.toJSONString(notifyResultMap));
                 } catch (Exception e) {
                     log.error("回调通知交易退单(已支付，已成团)失败 result:{}", JSON.toJSONString(notifyResultMap), e);
@@ -55,5 +57,10 @@ public class PaidTeam2RefundStrategy implements IRefundOrderStrategy {
                 }
             });
         }
+    }
+
+    @Override
+    public void reverseStock(TeamRefundSuccess teamRefundSuccess) throws Exception {
+        log.info("退单；恢复锁单量 - 已支付，已成团 恢复库存 userId:{} teamId:{} orderId:{}", teamRefundSuccess.getUserId(), teamRefundSuccess.getTeamId(), teamRefundSuccess.getOrderId());
     }
 }

@@ -5,7 +5,9 @@ import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyRefundAggregate;
 import com.lqj.domain.trade.model.entity.NotifyTaskEntity;
 import com.lqj.domain.trade.model.entity.TradeRefundOrderEntity;
+import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 import com.lqj.domain.trade.service.ITradeTaskService;
+import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
 import com.lqj.domain.trade.service.refund.business.IRefundOrderStrategy;
 import com.lqj.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -51,5 +53,13 @@ public class Unpaid2RefundStrategy implements IRefundOrderStrategy {
                 }
             });
         }
+    }
+
+    @Override
+    public void reverseStock(TeamRefundSuccess teamRefundSuccess) throws Exception {
+        log.info("退单；恢复锁单量 - 未支付，未成团 恢复库存 userId:{} teamId:{} orderId:{}", teamRefundSuccess.getUserId(), teamRefundSuccess.getTeamId(), teamRefundSuccess.getOrderId());
+        // 1. 恢复库存key
+        String recoveryTeamStockKey = TradeLockRuleFilterFactory.generateRecoveryTeamStockKey(teamRefundSuccess.getActivityId(), teamRefundSuccess.getTeamId());
+        repository.refund2AddRecovery(recoveryTeamStockKey, teamRefundSuccess.getOrderId());
     }
 }

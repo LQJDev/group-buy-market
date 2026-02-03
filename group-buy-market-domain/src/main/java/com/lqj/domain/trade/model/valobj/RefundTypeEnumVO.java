@@ -44,6 +44,20 @@ public enum RefundTypeEnumVO {
 
     private String info;
 
+    public static RefundTypeEnumVO getRefundTypeEnumVOByCode(String code) {
+        switch (code) {
+            case "unpaid_unlock":
+                return UNPAID_UNLOCK;
+            case "paid_unformed":
+                return PAID_UNFORMED;
+            case "paid_formed":
+                return PAID_FORMED;
+        }
+        throw new RuntimeException("退单类型枚举值不存在: " + code);
+    }
+
+
+
     /**
      * 抽象方法，由每个枚举值实现自己的匹配逻辑
      */

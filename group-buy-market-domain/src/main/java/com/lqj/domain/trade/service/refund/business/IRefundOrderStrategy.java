@@ -1,6 +1,7 @@
 package com.lqj.domain.trade.service.refund.business;
 
 import com.lqj.domain.trade.model.entity.TradeRefundOrderEntity;
+import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 
 /**
  * @Author 李岐鉴
@@ -10,4 +11,6 @@ import com.lqj.domain.trade.model.entity.TradeRefundOrderEntity;
 public interface IRefundOrderStrategy {
 
     void refundOrder(TradeRefundOrderEntity tradeRefundOrderEntity);
+
+    void reverseStock(TeamRefundSuccess teamRefundSuccess) throws Exception;
 }

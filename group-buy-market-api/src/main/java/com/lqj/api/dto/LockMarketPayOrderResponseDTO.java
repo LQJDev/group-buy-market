@@ -32,4 +32,6 @@ public class LockMarketPayOrderResponseDTO {
 
     // 交易订单状态
     private Integer tradeOrderStatus;
+
+    private String teamId;
 }

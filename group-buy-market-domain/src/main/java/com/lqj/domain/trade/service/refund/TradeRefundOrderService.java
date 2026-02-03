@@ -3,9 +3,11 @@ package com.lqj.domain.trade.service.refund;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.RefundTypeEnumVO;
+import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 import com.lqj.domain.trade.model.valobj.TradeOrderStatusEnumVO;
 import com.lqj.domain.trade.service.ITradeRefundOrderService;
 import com.lqj.domain.trade.service.refund.business.IRefundOrderStrategy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.Map;
  * @Date 2026/2/1
  * @Description TradeRefundOrderService 类
  */
+@Slf4j
 @Service
 public class TradeRefundOrderService implements ITradeRefundOrderService {
 
@@ -58,5 +61,16 @@ public class TradeRefundOrderService implements ITradeRefundOrderService {
                 .teamId(teamId)
                 .tradeRefundBehaviorEnum(TradeRefundBehaviorEntity.TradeRefundBehaviorEnum.SUCCESS)
                 .build();
+    }
+
+    @Override
+    public void restoreTeamLockStock(TeamRefundSuccess teamRefundSuccess) throws Exception {
+        log.info("逆向流程，恢复锁单量 userId:{} activityId:{} teamId:{}", teamRefundSuccess.getUserId(), teamRefundSuccess.getActivityId(), teamRefundSuccess.getTeamId());
+        String type = teamRefundSuccess.getType();
+        // 根据枚举值获取对应的退单类型
+        RefundTypeEnumVO refundTypeEnumVO = RefundTypeEnumVO.getRefundTypeEnumVOByCode(type);
+        IRefundOrderStrategy refundOrderStrategy = refundOrderStrategyMap.get(refundTypeEnumVO.getStrategy());
+
+        refundOrderStrategy.reverseStock(teamRefundSuccess);
     }
 }

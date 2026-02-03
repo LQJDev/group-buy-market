@@ -2,6 +2,7 @@ package com.lqj.domain.trade.service;
 
 import com.lqj.domain.trade.model.entity.TradeRefundBehaviorEntity;
 import com.lqj.domain.trade.model.entity.TradeRefundCommandEntity;
+import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 
 /**
  * @Author 李岐鉴
@@ -11,4 +12,6 @@ import com.lqj.domain.trade.model.entity.TradeRefundCommandEntity;
 public interface ITradeRefundOrderService {
 
     TradeRefundBehaviorEntity refundOrder(TradeRefundCommandEntity tradeRefundCommandEntity);
+
+    void restoreTeamLockStock(TeamRefundSuccess teamRefundSuccess) throws Exception;
 }

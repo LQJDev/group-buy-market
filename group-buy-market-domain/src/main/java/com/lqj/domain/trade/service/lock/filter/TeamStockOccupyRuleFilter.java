@@ -5,7 +5,7 @@ import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.entity.GroupBuyActivityEntity;
 import com.lqj.domain.trade.model.entity.TradeLockRuleCommandEntity;
 import com.lqj.domain.trade.model.entity.TradeLockRuleFilterBackEntity;
-import com.lqj.domain.trade.service.lock.factory.TradeRuleFilterFactory;
+import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
 
 import com.lqj.types.enums.ResponseCode;
 import com.lqj.types.exception.AppException;
@@ -22,13 +22,13 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Service
-public class TeamStockOccupyRuleFilter implements ILogicHandler<TradeLockRuleCommandEntity, TradeRuleFilterFactory.DynamicContext, TradeLockRuleFilterBackEntity> {
+public class TeamStockOccupyRuleFilter implements ILogicHandler<TradeLockRuleCommandEntity, TradeLockRuleFilterFactory.DynamicContext, TradeLockRuleFilterBackEntity> {
 
     @Resource
     private ITradeRepository repository;
 
     @Override
-    public TradeLockRuleFilterBackEntity apply(TradeLockRuleCommandEntity requestParameter, TradeRuleFilterFactory.DynamicContext dynamicContext) throws Exception {
+    public TradeLockRuleFilterBackEntity apply(TradeLockRuleCommandEntity requestParameter, TradeLockRuleFilterFactory.DynamicContext dynamicContext) throws Exception {
         log.info("交易规则过滤-组队库存校验{} activityId:{}", requestParameter.getUserId(), requestParameter.getActivityId());
 
         String teamId = requestParameter.getTeamId();
