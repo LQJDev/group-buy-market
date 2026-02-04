@@ -1,6 +1,7 @@
 package com.lqj.domain.trade.service.refund;
 
 import cn.bugstack.wrench.design.framework.link.model2.chain.BusinessLinkedList;
+import com.lqj.domain.activity.model.entity.UserGroupBuyOrderDetailEntity;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.RefundTypeEnumVO;
@@ -13,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,9 +30,12 @@ public class TradeRefundOrderService implements ITradeRefundOrderService {
 
     private final Map<String, IRefundOrderStrategy> refundOrderStrategyMap;
 
+    private final ITradeRepository repository;
+
 
     public TradeRefundOrderService(ITradeRepository repository, Map<String, IRefundOrderStrategy> refundOrderStrategyMap) {
         this.refundOrderStrategyMap = refundOrderStrategyMap;
+        this.repository = repository;
     }
 
     @Resource
@@ -50,5 +56,12 @@ public class TradeRefundOrderService implements ITradeRefundOrderService {
         IRefundOrderStrategy refundOrderStrategy = refundOrderStrategyMap.get(refundTypeEnumVO.getStrategy());
 
         refundOrderStrategy.reverseStock(teamRefundSuccess);
+    }
+
+    @Override
+    public List<UserGroupBuyOrderDetailEntity> queryTimeoutUnpaidOrderList() {
+        log.info("扫描数据，超时组队未支付订单");
+        return repository.queryTimeoutUnpaidOrderList();
+
     }
 }

@@ -1,6 +1,7 @@
 package com.lqj.infrastructure.adapter.repository;
 
 import com.alibaba.fastjson.JSON;
+import com.lqj.domain.activity.model.entity.UserGroupBuyOrderDetailEntity;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
 import com.lqj.domain.trade.model.aggregate.GroupBuyRefundAggregate;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Author 李岐鉴
@@ -436,6 +438,7 @@ public class TradeRepository implements ITradeRepository {
             put("teamId", tradeRefundOrderEntity.getTeamId());
             put("orderId", tradeRefundOrderEntity.getOrderId());
             put("activityId", tradeRefundOrderEntity.getActivityId());
+            put("outTradeNo", tradeRefundOrderEntity.getOutTradeNo());
         }}));
 
         notifyTaskDao.insert(notifyTask);
@@ -495,6 +498,7 @@ public class TradeRepository implements ITradeRepository {
             put("teamId", tradeRefundOrderEntity.getTeamId());
             put("orderId", tradeRefundOrderEntity.getOrderId());
             put("activityId", tradeRefundOrderEntity.getActivityId());
+            put("outTradeNo", tradeRefundOrderEntity.getOutTradeNo());
         }}));
 
         notifyTaskDao.insert(notifyTask);
@@ -560,6 +564,7 @@ public class TradeRepository implements ITradeRepository {
             put("userId", tradeRefundOrderEntity.getUserId());
             put("teamId", tradeRefundOrderEntity.getTeamId());
             put("orderId", tradeRefundOrderEntity.getOrderId());
+            put("outTradeNo", tradeRefundOrderEntity.getOutTradeNo());
             put("activityId", tradeRefundOrderEntity.getActivityId());
         }}));
 
@@ -607,5 +612,50 @@ public class TradeRepository implements ITradeRepository {
 
     }
 
+    @Override
+    public List<UserGroupBuyOrderDetailEntity> queryTimeoutUnpaidOrderList() {
+        List<GroupBuyOrderList> groupBuyOrderLists = groupBuyOrderListDao.queryTimeoutUnpaidOrderList();
+        if (null == groupBuyOrderLists || groupBuyOrderLists.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Set<String> teamIds = groupBuyOrderLists.stream()
+                .map(GroupBuyOrderList::getTeamId)
+                .collect(Collectors.toSet());
+
+        List<GroupBuyOrder> groupBuyOrders = groupBuyOrderDao.queryGroupBuyTeamByTeamIds(teamIds);
+
+        if (null == groupBuyOrders || groupBuyOrders.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<String, GroupBuyOrder> groupBuyOrderMap = groupBuyOrders.stream()
+                .collect(Collectors.toMap(GroupBuyOrder::getTeamId, order -> order));
+
+        // 转换数据
+        List<UserGroupBuyOrderDetailEntity> userGroupBuyOrderDetailEntities = new ArrayList<>();
+        for (GroupBuyOrderList groupBuyOrderList : groupBuyOrderLists) {
+            String teamId = groupBuyOrderList.getTeamId();
+            GroupBuyOrder groupBuyOrder = groupBuyOrderMap.get(teamId);
+            if (null == groupBuyOrder) continue;
+
+            UserGroupBuyOrderDetailEntity userGroupBuyOrderDetailEntity = UserGroupBuyOrderDetailEntity.builder()
+                    .userId(groupBuyOrderList.getUserId())
+                    .teamId(groupBuyOrder.getTeamId())
+                    .activityId(groupBuyOrder.getActivityId())
+                    .targetCount(groupBuyOrder.getTargetCount())
+                    .completeCount(groupBuyOrder.getCompleteCount())
+                    .lockCount(groupBuyOrder.getLockCount())
+                    .validStartTime(groupBuyOrder.getValidStartTime())
+                    .validEndTime(groupBuyOrder.getValidEndTime())
+                    .outTradeNo(groupBuyOrderList.getOutTradeNo())
+                    .source(groupBuyOrderList.getSource())
+                    .channel(groupBuyOrderList.getChannel())
+                    .build();
+
+            userGroupBuyOrderDetailEntities.add(userGroupBuyOrderDetailEntity);
+        }
+
+        return userGroupBuyOrderDetailEntities;
+    }
 
 }
