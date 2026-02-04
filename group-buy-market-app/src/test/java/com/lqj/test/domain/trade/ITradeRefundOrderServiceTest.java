@@ -7,7 +7,6 @@ import com.lqj.api.dto.LockMarketPayOrderResponseDTO;
 import com.lqj.api.response.Response;
 import com.lqj.domain.trade.model.entity.TradeRefundBehaviorEntity;
 import com.lqj.domain.trade.model.entity.TradeRefundCommandEntity;
-import com.lqj.domain.trade.service.ITradeLockOrderService;
 import com.lqj.domain.trade.service.ITradeRefundOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -15,9 +14,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import javax.annotation.Resource;
 import java.util.concurrent.CountDownLatch;
+
 
 /**
  * @Author 李岐鉴

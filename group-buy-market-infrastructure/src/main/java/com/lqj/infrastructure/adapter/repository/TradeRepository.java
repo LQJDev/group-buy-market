@@ -379,7 +379,6 @@ public class TradeRepository implements ITradeRepository {
     public void recoveryTeamStock(String recoveryTeamStockKey, Integer validTime) {
         // 首次组队拼团，是没有 teamId 的，所以不需要这个做处理。
         if (StringUtils.isBlank(recoveryTeamStockKey)) return;
-
         redisService.incr(recoveryTeamStockKey);
     }
 
