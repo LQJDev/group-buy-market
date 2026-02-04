@@ -272,10 +272,12 @@ public class TradeRepository implements ITradeRepository {
             // 拼团完成写入回调任务记录
             NotifyTask notifyTask = new NotifyTask();
             notifyTask.setActivityId(groupBuyTeamEntity.getActivityId());
+            notifyTask.setNotifyCategory(TaskNotifyCategoryEnumVO.TRADE_SETTLEMENT.getCode());
             notifyTask.setTeamId(groupBuyTeamEntity.getTeamId());
             notifyTask.setNotifyType(notifyConfigVO.getNotifyType().getCode());
             notifyTask.setNotifyMQ(NotifyTypeEnumVO.MQ.equals(notifyConfigVO.getNotifyType()) ? notifyConfigVO.getNotifyMQ() : null);
             notifyTask.setNotifyUrl(NotifyTypeEnumVO.HTTP.equals(notifyConfigVO.getNotifyType()) ? notifyConfigVO.getNotifyUrl() : null);
+            notifyTask.setUuid(groupBuyTeamEntity.getTeamId() + Constants.UNDERLINE + TaskNotifyCategoryEnumVO.TRADE_SETTLEMENT.getCode() + Constants.UNDERLINE + tradePaySuccessEntity.getOutTradeNo());
             notifyTask.setNotifyCount(0);
             notifyTask.setNotifyStatus(0);
 
@@ -343,18 +345,31 @@ public class TradeRepository implements ITradeRepository {
     }
 
     @Override
-    public int updateNotifyTaskStatusSuccess(String teamId) {
-        return notifyTaskDao.updateNotifyTaskStatusSuccess(teamId);
+    public int updateNotifyTaskStatusSuccess(NotifyTaskEntity notifyTaskEntity) {
+        NotifyTask notifyTask = NotifyTask.builder()
+                .teamId(notifyTaskEntity.getTeamId())
+                .uuid(notifyTaskEntity.getUuid())
+                .build();
+        return notifyTaskDao.updateNotifyTaskStatusSuccess(notifyTask);
     }
 
     @Override
-    public int updateNotifyTaskStatusError(String teamId) {
-        return notifyTaskDao.updateNotifyTaskStatusError(teamId);
+    public int updateNotifyTaskStatusError(NotifyTaskEntity notifyTaskEntity) {
+        NotifyTask notifyTask = NotifyTask.builder()
+                .teamId(notifyTaskEntity.getTeamId())
+                .uuid(notifyTaskEntity.getUuid())
+                .build();
+        return notifyTaskDao.updateNotifyTaskStatusError(notifyTask);
+
     }
 
     @Override
-    public int updateNotifyTaskStatusRetry(String teamId) {
-        return notifyTaskDao.updateNotifyTaskStatusRetry(teamId);
+    public int updateNotifyTaskStatusRetry(NotifyTaskEntity notifyTaskEntity) {
+        NotifyTask notifyTask = NotifyTask.builder()
+                .teamId(notifyTaskEntity.getTeamId())
+                .uuid(notifyTaskEntity.getUuid())
+                .build();
+        return notifyTaskDao.updateNotifyTaskStatusRetry(notifyTask);
     }
 
     @Override

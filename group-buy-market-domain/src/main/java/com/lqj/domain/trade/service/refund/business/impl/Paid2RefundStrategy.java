@@ -9,6 +9,7 @@ import com.lqj.domain.trade.model.entity.TradeRefundOrderEntity;
 import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 import com.lqj.domain.trade.service.ITradeTaskService;
 import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
+import com.lqj.domain.trade.service.refund.business.AbstractRefundOrderStrategy;
 import com.lqj.domain.trade.service.refund.business.IRefundOrderStrategy;
 import com.lqj.types.exception.AppException;
 import lombok.extern.slf4j.Slf4j;
@@ -25,19 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Slf4j
 @Service("paid2RefundStrategy")
-public class Paid2RefundStrategy implements IRefundOrderStrategy {
-
-    @Resource
-    private ThreadPoolExecutor threadPoolExecutor;
-
-    @Resource
-    private ITradeRepository repository;
-
-    @Resource
-    private ITradePort port;
-
-    @Resource
-    private ITradeTaskService tradeTaskService;
+public class Paid2RefundStrategy extends AbstractRefundOrderStrategy {
 
     @Override
     public void refundOrder(TradeRefundOrderEntity tradeRefundOrderEntity) {
@@ -45,25 +34,11 @@ public class Paid2RefundStrategy implements IRefundOrderStrategy {
         NotifyTaskEntity notifyTaskEntity = repository.paid2Refund(GroupBuyRefundAggregate
                 .buildPaid2RefundAggregate(tradeRefundOrderEntity, -1, -1)
                 );
-
-        if (null != notifyTaskEntity) {
-            threadPoolExecutor.execute(() -> {
-                Map<String, Integer> notifyResultMap = null;
-                try {
-                    notifyResultMap = tradeTaskService.execNotifyJob(notifyTaskEntity);
-                    log.info("回调通知交易退单 result:{}", JSON.toJSONString(notifyResultMap));
-                } catch (Exception e) {
-                    log.error("回调通知交易退单失败 result:{}", JSON.toJSONString(notifyResultMap), e);
-                    throw new AppException(e.getMessage());
-                }
-            });
-        }
+        sendRefundNotifyMessage(notifyTaskEntity, "已支付，未成团");
     }
 
     @Override
     public void reverseStock(TeamRefundSuccess teamRefundSuccess) throws Exception {
-        log.info("退单；恢复锁单量 - 已支付，未成团，但有锁单记录，要恢复锁单库存 {} {} {}", teamRefundSuccess.getUserId(), teamRefundSuccess.getTeamId(), teamRefundSuccess.getOrderId());
-        String recoveryTeamStockKey = TradeLockRuleFilterFactory.generateRecoveryTeamStockKey(teamRefundSuccess.getActivityId(), teamRefundSuccess.getTeamId());
-        repository.refund2AddRecovery(recoveryTeamStockKey, teamRefundSuccess.getOrderId());
+        doReverseStock(teamRefundSuccess, "已支付，未成团，但有锁单记录，要恢复锁单库存");
     }
 }

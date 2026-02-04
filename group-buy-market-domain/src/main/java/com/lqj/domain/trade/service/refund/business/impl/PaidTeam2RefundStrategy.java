@@ -9,6 +9,7 @@ import com.lqj.domain.trade.model.entity.TradeRefundOrderEntity;
 import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
 import com.lqj.domain.trade.service.ITradeTaskService;
 import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
+import com.lqj.domain.trade.service.refund.business.AbstractRefundOrderStrategy;
 import com.lqj.domain.trade.service.refund.business.IRefundOrderStrategy;
 import com.lqj.types.enums.GroupBuyOrderEnumVO;
 import com.lqj.types.exception.AppException;
@@ -26,16 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Slf4j
 @Service("paidTeam2RefundStrategy")
-public class PaidTeam2RefundStrategy implements IRefundOrderStrategy {
-
-    @Resource
-    private ITradeRepository repository;
-
-    @Resource
-    private ITradeTaskService tradeTaskService;
-
-    @Resource
-    private ThreadPoolExecutor threadPoolExecutor;
+public class PaidTeam2RefundStrategy extends AbstractRefundOrderStrategy {
 
     @Override
     public void refundOrder(TradeRefundOrderEntity tradeRefundOrderEntity) {
@@ -45,18 +37,8 @@ public class PaidTeam2RefundStrategy implements IRefundOrderStrategy {
         GroupBuyOrderEnumVO groupBuyOrderEnumVO = 1 == completeCount ? GroupBuyOrderEnumVO.FAIL : GroupBuyOrderEnumVO.COMPLETE_FAIL;
         NotifyTaskEntity notifyTaskEntity = repository.paidTeam2Refund(GroupBuyRefundAggregate
                 .buildPaidTeam2RefundAggregate(tradeRefundOrderEntity, -1, -1, groupBuyOrderEnumVO));
-        if (null != notifyTaskEntity) {
-            threadPoolExecutor.execute(() -> {
-                Map<String, Integer> notifyResultMap = null;
-                try {
-                    notifyResultMap = tradeTaskService.execNotifyJob(notifyTaskEntity);
-                    log.info("回调通知交易退单(已支付，已成团) result:{}", JSON.toJSONString(notifyResultMap));
-                } catch (Exception e) {
-                    log.error("回调通知交易退单(已支付，已成团)失败 result:{}", JSON.toJSONString(notifyResultMap), e);
-                    throw new AppException(e.getMessage());
-                }
-            });
-        }
+
+        sendRefundNotifyMessage(notifyTaskEntity, "已支付，已成团");
     }
 
     @Override

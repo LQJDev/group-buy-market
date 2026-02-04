@@ -2,6 +2,7 @@ package com.lqj.trigger.job;
 
 import com.alibaba.fastjson.JSON;
 import com.lqj.domain.trade.service.ITradeSettlementOrderService;
+import com.lqj.domain.trade.service.ITradeTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -22,10 +23,11 @@ import java.util.concurrent.TimeUnit;
 public class GroupBuyNotifyJob {
 
     @Resource
-    private ITradeSettlementOrderService tradeSettlementOrderService;
+    private RedissonClient redissonClient;
 
     @Resource
-    private RedissonClient redissonClient;
+    private ITradeTaskService tradeTaskService;
+
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void exec() {
@@ -33,7 +35,7 @@ public class GroupBuyNotifyJob {
         try {
             boolean isLock = lock.tryLock(3, 0, TimeUnit.SECONDS);
             if (!isLock) return;
-            Map<String, Integer> result = tradeSettlementOrderService.execSettlementNotifyJob();
+            Map<String, Integer> result = tradeTaskService.execNotifyJob();
             log.info("定时任务，回调通知拼团完结任务 result:{}", JSON.toJSONString(result));
         } catch (Exception e) {
             log.error("定时任务，回调通知拼团完结任务异常", e);

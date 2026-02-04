@@ -37,8 +37,8 @@ public class ITradeRefundOrderServiceTest {
     @Test
     public void test_refundOrder_01() throws Exception {
         TradeRefundCommandEntity tradeRefundCommandEntity = TradeRefundCommandEntity.builder()
-                .userId("xfg05")
-                .outTradeNo("406255856997")
+                .userId("xfg06")
+                .outTradeNo("001214083131")
                 .source("s01")
                 .channel("c01")
                 .build();
@@ -114,7 +114,7 @@ public class ITradeRefundOrderServiceTest {
     public void test_lockMarketPayOrder_teamId_not_null() {
         LockMarketPayOrderRequestDTO lockMarketPayOrderRequestDTO = new LockMarketPayOrderRequestDTO();
         lockMarketPayOrderRequestDTO.setUserId("xfg08");
-        lockMarketPayOrderRequestDTO.setTeamId("86114370");
+        lockMarketPayOrderRequestDTO.setTeamId("30031620");
         lockMarketPayOrderRequestDTO.setActivityId(100123L);
         lockMarketPayOrderRequestDTO.setGoodsId("9890001");
         lockMarketPayOrderRequestDTO.setSource("s01");

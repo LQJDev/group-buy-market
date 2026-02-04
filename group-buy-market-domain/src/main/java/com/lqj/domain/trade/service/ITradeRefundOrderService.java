@@ -11,7 +11,7 @@ import com.lqj.domain.trade.model.valobj.TeamRefundSuccess;
  */
 public interface ITradeRefundOrderService {
 
-    TradeRefundBehaviorEntity refundOrder(TradeRefundCommandEntity tradeRefundCommandEntity);
+    TradeRefundBehaviorEntity refundOrder(TradeRefundCommandEntity tradeRefundCommandEntity) throws Exception;
 
     void restoreTeamLockStock(TeamRefundSuccess teamRefundSuccess) throws Exception;
 }
