@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @Date 2026/2/4
  * @Description TimeoutRefundJob 类
  */
-@Service
+//@Service
 @Slf4j
 public class TimeoutRefundJob {
 

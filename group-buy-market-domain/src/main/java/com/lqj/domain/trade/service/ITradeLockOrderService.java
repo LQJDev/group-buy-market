@@ -40,4 +40,23 @@ public interface ITradeLockOrderService {
     MarketPayOrderEntity lockMarketPayOrder(UserEntity userEntity, PayActivityEntity payActivityEntity, PayDiscountEntity payDiscountEntity) throws Exception;
 
 
+    /**
+     * 查询订单
+     * @param orderId 订单id
+     * @return 订单实体对象
+     */
+    MarketPayOrderEntity findByOrderId(String orderId);
+
+    /**
+     * 更新订单状态-未支付-结束2
+     * @param orderId 订单id
+     * @return 更新结果
+     */
+    int updateOrderStatusIfCreate(String orderId);
+
+    /**
+     * 恢复拼团库存
+     * @param recoveryTeamStockKey
+     */
+    void recoveryTeamStock(String recoveryTeamStockKey);
 }

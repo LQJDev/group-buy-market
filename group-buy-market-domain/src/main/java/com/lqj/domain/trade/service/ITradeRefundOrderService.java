@@ -19,4 +19,6 @@ public interface ITradeRefundOrderService {
     void restoreTeamLockStock(TeamRefundSuccess teamRefundSuccess) throws Exception;
 
     List<UserGroupBuyOrderDetailEntity> queryTimeoutUnpaidOrderList();
+
+    UserGroupBuyOrderDetailEntity queryTimeoutUnpaidOrderListByOrderDetail(UserGroupBuyOrderDetailEntity orderDetailEntity);
 }

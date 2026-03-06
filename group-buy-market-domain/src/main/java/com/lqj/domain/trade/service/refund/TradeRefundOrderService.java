@@ -54,7 +54,6 @@ public class TradeRefundOrderService implements ITradeRefundOrderService {
         // 根据枚举值获取对应的退单类型
         RefundTypeEnumVO refundTypeEnumVO = RefundTypeEnumVO.getRefundTypeEnumVOByCode(type);
         IRefundOrderStrategy refundOrderStrategy = refundOrderStrategyMap.get(refundTypeEnumVO.getStrategy());
-
         refundOrderStrategy.reverseStock(teamRefundSuccess);
     }
 
@@ -63,5 +62,10 @@ public class TradeRefundOrderService implements ITradeRefundOrderService {
         log.info("扫描数据，超时组队未支付订单");
         return repository.queryTimeoutUnpaidOrderList();
 
+    }
+
+    @Override
+    public UserGroupBuyOrderDetailEntity queryTimeoutUnpaidOrderListByOrderDetail(UserGroupBuyOrderDetailEntity orderDetailEntity) {
+        return repository.queryTimeoutUnpaidOrderListByOrderDetail(orderDetailEntity);
     }
 }

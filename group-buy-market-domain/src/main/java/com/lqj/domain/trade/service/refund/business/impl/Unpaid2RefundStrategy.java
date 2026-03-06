@@ -34,7 +34,6 @@ public class Unpaid2RefundStrategy extends AbstractRefundOrderStrategy {
         log.info("退单；未支付，未成团 userId:{} teamId:{} orderId:{}", tradeRefundOrderEntity.getUserId(), tradeRefundOrderEntity.getTeamId(), tradeRefundOrderEntity.getOrderId());
         // 1. 退单；未支付，未成团
         NotifyTaskEntity notifyTaskEntity = repository.unpaid2Refund(GroupBuyRefundAggregate.buildUnpaid2RefundAggregate(tradeRefundOrderEntity, -1));
-
         // 2. 发送MQ消息 - 发送MQ，恢复锁单库存量使用
         sendRefundNotifyMessage(notifyTaskEntity, "未支付，未成团");
     }

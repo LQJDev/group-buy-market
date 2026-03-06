@@ -37,4 +37,8 @@ public interface IGroupBuyOrderListDao {
     int paidTeam2Refund(GroupBuyOrderList groupBuyOrderListReq);
 
     List<GroupBuyOrderList> queryTimeoutUnpaidOrderList();
+
+    GroupBuyOrderList findByOrderId(String orderId);
+
+    int updateOrderStateIfCreate(String orderId);
 }

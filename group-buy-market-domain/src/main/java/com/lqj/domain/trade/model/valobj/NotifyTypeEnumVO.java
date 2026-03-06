@@ -17,7 +17,9 @@ import org.checkerframework.checker.units.qual.A;
 public enum NotifyTypeEnumVO {
 
     HTTP("HTTP", "HTTP 回调"),
-    MQ("MQ", "MQ 消息通知");
+    MQ("MQ", "MQ 消息通知"),
+    MQ_DELAY("MQ_DELAY", "MQ 延时消息通知"),
+    ;
 
     private String code;
     private String info;

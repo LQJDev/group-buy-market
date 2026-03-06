@@ -47,7 +47,6 @@ public class TeamStockOccupyRuleFilter implements ILogicHandler<TradeLockRuleCom
             log.warn("交易规则过滤-组队库存校验{} activityId:{} 抢占失败:{}", requestParameter.getUserId(), requestParameter.getActivityId(), teamStockKey);
             throw new AppException(ResponseCode.E0008);
         }
-
         return TradeLockRuleFilterBackEntity.builder()
                 .userTakeOrderCount(dynamicContext.getUserTakeOrderCount())
                 .recoveryTeamStockKey(recoveryTeamStockKey)

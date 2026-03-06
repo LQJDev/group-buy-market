@@ -17,6 +17,7 @@ import com.lqj.infrastructure.dao.po.GroupBuyOrder;
 import com.lqj.infrastructure.dao.po.GroupBuyOrderList;
 import com.lqj.infrastructure.dao.po.NotifyTask;
 import com.lqj.infrastructure.dcc.DCCService;
+import com.lqj.infrastructure.event.EventPublisher;
 import com.lqj.infrastructure.redis.IRedisService;
 import com.lqj.types.common.Constants;
 import com.lqj.types.enums.ActivityStatusEnumVO;
@@ -66,9 +67,11 @@ public class TradeRepository implements ITradeRepository {
     @Value("${spring.rabbitmq.config.producer.topic_team_refund.routing_key}")
     private String topic_team_refund;
 
-
     @Resource
     private IRedisService redisService;
+
+    @Resource
+    private EventPublisher eventPublisher;
 
     @Override
     public MarketPayOrderEntity queryMarketPayOrderEntityByOutTradeNo(String userId, String outTradeNo) {
@@ -393,7 +396,7 @@ public class TradeRepository implements ITradeRepository {
     }
 
     @Override
-    public void recoveryTeamStock(String recoveryTeamStockKey, Integer validTime) {
+    public void recoveryTeamStock(String recoveryTeamStockKey) {
         // 首次组队拼团，是没有 teamId 的，所以不需要这个做处理。
         if (StringUtils.isBlank(recoveryTeamStockKey)) return;
         redisService.incr(recoveryTeamStockKey);
@@ -656,6 +659,61 @@ public class TradeRepository implements ITradeRepository {
         }
 
         return userGroupBuyOrderDetailEntities;
+    }
+
+    @Override
+    public MarketPayOrderEntity findByOrderId(String orderId) {
+        GroupBuyOrderList groupBuyOrderList = groupBuyOrderListDao.findByOrderId(orderId);
+        return MarketPayOrderEntity.builder()
+                .teamId(groupBuyOrderList.getTeamId())
+                .orderId(groupBuyOrderList.getOrderId())
+                .originalPrice(groupBuyOrderList.getOriginalPrice())
+                .deductionPrice(groupBuyOrderList.getDeductionPrice())
+                .payPrice(groupBuyOrderList.getPayPrice())
+                .tradeOrderStatusEnumVO(TradeOrderStatusEnumVO.valueOf(groupBuyOrderList.getStatus())).build();
+    }
+
+    @Override
+    public int updateOrderStatusIfCreate(String orderId) {
+        int i = groupBuyOrderListDao.updateOrderStateIfCreate(orderId);
+        return i;
+    }
+
+    @Override
+    public void publishDelay(OrderDelayMessageVO orderDelayMessageVO, long delayMillis) {
+        eventPublisher.publishDelay(orderDelayMessageVO, delayMillis);
+    }
+
+    @Override
+    public UserGroupBuyOrderDetailEntity queryTimeoutUnpaidOrderListByOrderDetail(UserGroupBuyOrderDetailEntity orderDetailEntity) {
+        GroupBuyOrderList groupBuyOrderList = new GroupBuyOrderList();
+        groupBuyOrderList.setUserId(orderDetailEntity.getUserId());
+        groupBuyOrderList.setOutTradeNo(orderDetailEntity.getOutTradeNo());
+        groupBuyOrderList.setStatus(TradeOrderStatusEnumVO.CREATE.getCode());
+        GroupBuyOrderList groupBuyOrderListRes = groupBuyOrderListDao.queryGroupBuyOrderRecordByOutTradeNo(groupBuyOrderList);
+        if (null == groupBuyOrderListRes) {
+            return null;
+        }
+        String teamId = groupBuyOrderListRes.getTeamId();
+        GroupBuyOrder groupBuyOrder = groupBuyOrderDao.queryGroupBuyTeamByTeamId(teamId);
+        if (null == groupBuyOrder) {
+            return null;
+        }
+        UserGroupBuyOrderDetailEntity userGroupBuyOrderDetailEntity = UserGroupBuyOrderDetailEntity.builder()
+                .userId(groupBuyOrderList.getUserId())
+                .teamId(groupBuyOrder.getTeamId())
+                .activityId(groupBuyOrder.getActivityId())
+                .targetCount(groupBuyOrder.getTargetCount())
+                .completeCount(groupBuyOrder.getCompleteCount())
+                .lockCount(groupBuyOrder.getLockCount())
+                .validStartTime(groupBuyOrder.getValidStartTime())
+                .validEndTime(groupBuyOrder.getValidEndTime())
+                .outTradeNo(groupBuyOrderList.getOutTradeNo())
+                .source(groupBuyOrderList.getSource())
+                .channel(groupBuyOrderList.getChannel())
+                .build();
+
+        return userGroupBuyOrderDetailEntity;
     }
 
 }

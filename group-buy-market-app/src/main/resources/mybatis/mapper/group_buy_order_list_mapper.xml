@@ -74,6 +74,11 @@
             order_id = #{orderId} and
             status = 1
     </update>
+    <update id="updateOrderStateIfCreate" parameterType="java.lang.String">
+        update group_buy_order_list
+        set status = 2 and update_time = now()
+        where order_id = #{orderId} and status = 0
+    </update>
 
     <select id="queryGroupBuyCompleteOrderOutTradeNoListByTeamId" resultType="java.lang.String">
         select out_trade_no from group_buy_order_list where team_id = #{teamId} and status = 1
@@ -115,5 +120,11 @@
           and now() > end_time
         limit 10
     </select>
-
+    <select id="findByOrderId" resultMap="dataMap" parameterType="java.lang.String">
+        select user_id, team_id, order_id, activity_id, start_time,
+               end_time, goods_id, source, channel, original_price, deduction_price,
+               pay_price, status, out_trade_no, out_trade_time, source, channel
+        from group_buy_order_list
+        where order_id = #{orderId}
+    </select>
 </mapper>

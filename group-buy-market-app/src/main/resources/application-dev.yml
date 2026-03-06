@@ -110,6 +110,8 @@ management:
     health:
       show-details: always # 显示详细的健康检查信息
   metrics:
+    tags:
+      application: group-buy-market
     export:
       prometheus:
         enabled: true # 启用Prometheus

@@ -9,6 +9,7 @@ import com.lqj.domain.trade.model.entity.GroupBuyTeamEntity;
 import com.lqj.domain.trade.model.entity.MarketPayOrderEntity;
 import com.lqj.domain.trade.model.entity.NotifyTaskEntity;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
+import com.lqj.domain.trade.model.valobj.OrderDelayMessageVO;
 
 import java.util.List;
 
@@ -47,7 +48,7 @@ public interface ITradeRepository {
 
     boolean occupyTeamStock(String teamStockKey, String recoveryTeamStockKey, Integer target, Integer validTime);
 
-    void recoveryTeamStock(String recoveryTeamStockKey, Integer validTime);
+    void recoveryTeamStock(String recoveryTeamStockKey);
 
     NotifyTaskEntity unpaid2Refund(GroupBuyRefundAggregate groupBuyRefundAggregate);
 
@@ -58,4 +59,12 @@ public interface ITradeRepository {
     void refund2AddRecovery(String recoveryTeamStockKey, String orderId);
 
     List<UserGroupBuyOrderDetailEntity> queryTimeoutUnpaidOrderList();
+
+    MarketPayOrderEntity findByOrderId(String orderId);
+
+    int updateOrderStatusIfCreate(String orderId);
+
+    void publishDelay(OrderDelayMessageVO orderDelayMessageVO, long delayMillis);
+
+    UserGroupBuyOrderDetailEntity queryTimeoutUnpaidOrderListByOrderDetail(UserGroupBuyOrderDetailEntity orderDetailEntity);
 }

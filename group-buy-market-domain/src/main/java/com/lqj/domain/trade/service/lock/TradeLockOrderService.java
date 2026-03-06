@@ -1,13 +1,16 @@
 package com.lqj.domain.trade.service.lock;
 
+import ch.qos.logback.core.joran.spi.EventPlayer;
 import cn.bugstack.wrench.design.framework.link.model2.chain.BusinessLinkedList;
+
+import com.google.common.eventbus.EventBus;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
 import com.lqj.domain.trade.model.entity.*;
 import com.lqj.domain.trade.model.valobj.GroupBuyProgressVO;
+import com.lqj.domain.trade.model.valobj.OrderDelayMessageVO;
 import com.lqj.domain.trade.service.ITradeLockOrderService;
 import com.lqj.domain.trade.service.lock.factory.TradeLockRuleFilterFactory;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -62,8 +65,34 @@ public class TradeLockOrderService implements ITradeLockOrderService {
                 .payDiscountEntity(payDiscountEntity)
                 .userTakeOrderCount(userTakeOrderCount)
                 .build();
+        MarketPayOrderEntity marketPayOrderEntity = tradeRepository.lockMarketPayOrder(groupBuyOrderAggregate);
 
+        OrderDelayMessageVO orderDelayMessageVO = OrderDelayMessageVO.builder()
+                .source(payDiscountEntity.getSource())
+                .channel(payDiscountEntity.getChannel())
+                .outTradeNo(payDiscountEntity.getOutTradeNo())
+                .userId(userEntity.getUserId()).build();
+
+
+        tradeRepository.publishDelay(orderDelayMessageVO, 10000);
         // 锁定聚合订单 - 这会用户只是下单还没有支付。后续会有2个流程；支付成功、超时未支付（回退）
-        return tradeRepository.lockMarketPayOrder(groupBuyOrderAggregate);
+        return marketPayOrderEntity;
+    }
+
+    @Override
+    public MarketPayOrderEntity findByOrderId(String orderId) {
+        log.info("拼团交易-查询营销订单:{}", orderId);
+        return tradeRepository.findByOrderId(orderId);
+    }
+
+    @Override
+    public int updateOrderStatusIfCreate(String orderId) {
+        log.info("拼团交易-超时关单:{}", orderId);
+        return tradeRepository.updateOrderStatusIfCreate(orderId);
+    }
+
+    @Override
+    public void recoveryTeamStock(String recoveryTeamStockKey) {
+        tradeRepository.recoveryTeamStock(recoveryTeamStockKey);
     }
 }
