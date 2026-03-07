@@ -4,6 +4,7 @@ import ch.qos.logback.core.joran.spi.EventPlayer;
 import cn.bugstack.wrench.design.framework.link.model2.chain.BusinessLinkedList;
 
 import com.google.common.eventbus.EventBus;
+import com.lqj.domain.trade.adapter.port.ITradePort;
 import com.lqj.domain.trade.adapter.repository.ITradeRepository;
 import com.lqj.domain.trade.model.aggregate.GroupBuyOrderAggregate;
 import com.lqj.domain.trade.model.entity.*;
@@ -28,6 +29,9 @@ public class TradeLockOrderService implements ITradeLockOrderService {
 
     @Resource
     private ITradeRepository tradeRepository;
+
+    @Resource
+    private ITradePort tradePort;
 
     @Resource
     private BusinessLinkedList<TradeLockRuleCommandEntity, TradeLockRuleFilterFactory.DynamicContext, TradeLockRuleFilterBackEntity> tradeRuleFilter;
@@ -74,7 +78,8 @@ public class TradeLockOrderService implements ITradeLockOrderService {
                 .userId(userEntity.getUserId()).build();
 
 
-        tradeRepository.publishDelay(orderDelayMessageVO, 10000);
+        tradeRepository.publishDelay(orderDelayMessageVO, 500000);
+        tradePort.addOrderToDelayZSet(orderDelayMessageVO.getOutTradeNo(), 10000);
         // 锁定聚合订单 - 这会用户只是下单还没有支付。后续会有2个流程；支付成功、超时未支付（回退）
         return marketPayOrderEntity;
     }

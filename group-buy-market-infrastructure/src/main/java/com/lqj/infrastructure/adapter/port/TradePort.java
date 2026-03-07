@@ -67,4 +67,11 @@ public class TradePort implements ITradePort {
             return NotifyTaskHTTPEnumVO.NULL.getCode();
         }
     }
+
+    @Override
+    public void addOrderToDelayZSet(String outTradeNo, long delayMillis) {
+        String key = "market:pay:order:delay";
+        long expireAt = System.currentTimeMillis() + delayMillis;
+        redisService.addToSortedSet(key, outTradeNo, expireAt);
+    }
 }

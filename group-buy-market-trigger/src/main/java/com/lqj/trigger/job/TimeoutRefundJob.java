@@ -4,24 +4,22 @@ import com.lqj.domain.activity.model.entity.UserGroupBuyOrderDetailEntity;
 import com.lqj.domain.trade.model.entity.TradeRefundCommandEntity;
 import com.lqj.domain.trade.service.ITradeRefundOrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
+import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Collection;
 
 /**
  * @Author 李岐鉴
- * @Date 2026/2/4
- * @Description TimeoutRefundJob 类
+ * @Date 2026/3/7
+ * @Description 单机版 ZSet 超时退单任务（高效分页扫描，无分布式锁）
  */
-//@Service
+@Service
 @Slf4j
 public class TimeoutRefundJob {
-
 
     @Resource
     private RedissonClient redissonClient;
@@ -29,63 +27,68 @@ public class TimeoutRefundJob {
     @Resource
     private ITradeRefundOrderService tradeRefundOrderService;
 
+    private static final String ZSET_KEY = "market:pay:order:delay";
 
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?") // 每分钟执行一次
     public void exec() {
-
-        RLock lock = redissonClient.getLock("group_buy_market_timeout_refund_job_exec");
-
         try {
-            boolean isLocked = lock.tryLock(3, 60, TimeUnit.SECONDS);
-            if (!isLocked) {
-                log.info("超时退单定时任务，获取锁失败，跳过本次执行");
-                return;
-            }
-            log.info("超时退单定时任务开始执行");
-            List<UserGroupBuyOrderDetailEntity> timeoutOrderList = tradeRefundOrderService.queryTimeoutUnpaidOrderList();
-            if (timeoutOrderList == null || timeoutOrderList.isEmpty()) {
-                log.info("超时退单定时任务，未发现超时未支付订单");
-                return;
-            }
+            log.info("单机超时退单任务开始执行");
 
-            log.info("超时退单定时任务，发现超时未支付订单数量：{}", timeoutOrderList.size());
+            RScoredSortedSet<Object> delaySet = redissonClient.getScoredSortedSet(ZSET_KEY);
+            long now = System.currentTimeMillis();
+            int batchSize = 100;
 
-            int successCount = 0;
-            int failCount = 0;
+            while (true) {
+                // Redis分页查询 score <= now 的订单
+                Collection<Object> expiredOrders = delaySet.valueRange(0, true, now, true, 0, batchSize);
 
-            // 遍历处理每个超时订单
-            for (UserGroupBuyOrderDetailEntity orderDetail : timeoutOrderList) {
-                try {
-                    // 构建退单命令
-                    TradeRefundCommandEntity refundCommand = TradeRefundCommandEntity.builder()
-                            .userId(orderDetail.getUserId())
-                            .outTradeNo(orderDetail.getOutTradeNo())
-                            .source(orderDetail.getSource())
-                            .channel(orderDetail.getChannel())
-                            .build();
+                if (expiredOrders.isEmpty()) {
+                    break;
+                }
 
-                    // 执行退单
-                    tradeRefundOrderService.refundOrder(refundCommand);
-                    successCount++;
+                log.info("处理本批超时订单数量：{}", expiredOrders.size());
 
-                    log.info("超时订单退单成功，用户ID：{}，交易单号：{}", orderDetail.getUserId(), orderDetail.getOutTradeNo());
+                for (Object obj : expiredOrders) {
+                    String outTradeNo = (String) obj;
 
-                } catch (Exception e) {
-                    failCount++;
-                    log.error("超时订单退单失败，用户ID：{}，交易单号：{}，错误信息：{}",
-                            orderDetail.getUserId(), orderDetail.getOutTradeNo(), e.getMessage(), e);
+                    // 查询订单详情
+                    UserGroupBuyOrderDetailEntity orderDetail =
+                            tradeRefundOrderService.queryTimeoutUnpaidOrderListByOrderDetail(
+                                    UserGroupBuyOrderDetailEntity.builder().outTradeNo(outTradeNo).build()
+                            );
+
+                    if (orderDetail == null) {
+                        // 已支付或不存在，直接删除 ZSet 防止脏数据累积
+                        delaySet.remove(outTradeNo);
+                        log.info("ZSet移除已支付/不存在订单：{}", outTradeNo);
+                        continue;
+                    }
+
+                    try {
+                        TradeRefundCommandEntity refundCommand = TradeRefundCommandEntity.builder()
+                                .userId(orderDetail.getUserId())
+                                .outTradeNo(orderDetail.getOutTradeNo())
+                                .source(orderDetail.getSource())
+                                .channel(orderDetail.getChannel())
+                                .build();
+
+                        // 执行幂等退单
+                        tradeRefundOrderService.refundOrder(refundCommand);
+
+                        // 成功退单，删除 ZSet
+                        delaySet.remove(outTradeNo);
+                        log.info("超时订单退单成功，用户ID：{}，交易单号：{}", orderDetail.getUserId(), orderDetail.getOutTradeNo());
+
+                    } catch (Exception e) {
+                        log.error("超时订单退单失败，交易单号：{}，错误：{}", outTradeNo, e.getMessage(), e);
+                    }
                 }
             }
 
-            log.info("超时退单定时任务执行完成，成功：{}，失败：{}", successCount, failCount);
+            log.info("单机超时退单任务执行完成");
 
         } catch (Exception e) {
-            log.error("超时退单定时任务执行异常", e);
-        } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+            log.error("单机超时退单任务执行异常", e);
         }
-
     }
 }

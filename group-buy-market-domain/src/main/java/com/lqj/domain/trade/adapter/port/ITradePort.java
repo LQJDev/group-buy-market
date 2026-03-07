@@ -11,4 +11,5 @@ public interface ITradePort {
 
     String groupBuyNotify(NotifyTaskEntity notifyTask) throws Exception;
 
+    void addOrderToDelayZSet(String outTradeNo, long delayTime);
 }

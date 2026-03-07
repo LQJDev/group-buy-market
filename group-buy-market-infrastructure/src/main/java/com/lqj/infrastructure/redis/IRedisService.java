@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -205,6 +206,36 @@ public interface IRedisService {
      * @param value 值
      */
     void addToSortedSet(String key, String value);
+
+
+    /**
+     * 将指定的值添加到有序集合中
+     *
+     * @param key   键
+     * @param value 值
+     * @param score 分数
+     */
+    void addToSortedSet(String key, String value, double score);
+
+    /**
+     * 通过分数范围获取有序集合中的元素
+     *
+     * @param key     键
+     * @param maxScore 分数
+     * @return 值
+     */
+    Set<String> rangeByScore(String key, double maxScore);
+
+
+    /**
+     * 移除有序集合中的元素
+     *
+     * @param key   键
+     * @param value 值
+     */
+    void removeFromSortedSet(String key, String value);
+
+
 
     /**
      * 获取 Redis 锁（可重入锁）

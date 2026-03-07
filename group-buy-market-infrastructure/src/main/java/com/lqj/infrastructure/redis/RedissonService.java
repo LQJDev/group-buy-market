@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Redis 服务 - Redisson
@@ -130,6 +132,30 @@ public class RedissonService implements IRedisService {
     public void addToSortedSet(String key, String value) {
         RSortedSet<String> sortedSet = redissonClient.getSortedSet(key);
         sortedSet.add(value);
+    }
+
+    @Override
+    public void addToSortedSet(String key, String value, double score) {
+        RScoredSortedSet<Object> scoredSortedSet = redissonClient.getScoredSortedSet(key);
+        scoredSortedSet.add(score, value);
+    }
+
+    /**
+     * 获取 score 小于等于 maxScore 的元素
+     */
+    public Set<String> rangeByScore(String key, double maxScore) {
+        RScoredSortedSet<String> sortedSet = redissonClient.getScoredSortedSet(key);
+        return sortedSet.valueRange(0, (int) sortedSet.size() - 1).stream()
+                .filter(v -> sortedSet.getScore(v) <= maxScore)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 删除元素
+     */
+    public void removeFromSortedSet(String key, String value) {
+        RScoredSortedSet<String> sortedSet = redissonClient.getScoredSortedSet(key);
+        sortedSet.remove(value);
     }
 
     @Override
